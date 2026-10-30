@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Elite Uncopylocked</title>
+<link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-10z' fill='%23ff6b2c'/%3E%3C/svg%3E">
+<link id="apple" rel="apple-touch-icon" href="">
 <style>
 :root{--bg:#0b0d10;--s1:#12151a;--s2:#181c22;--line:#262b33;--tx:#e7e9ee;--mu:#8e96a3;--ember:#ff6b2c;--ember2:#ff3d00;--gold:#ffb547}
 *{box-sizing:border-box}
@@ -70,6 +72,15 @@ textarea{resize:vertical}
 .msg.me{align-self:flex-end;background:var(--s2);border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:linear-gradient(180deg,#1a1d23,#14171c);border:1px solid #2c2620}
 .msg.bot::before{content:"Assistant";display:block;font-size:11px;color:var(--ember);font-weight:600;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.msg.bot{white-space:normal}
+.msg.bot p{margin:0 0 8px}.msg.bot p:last-child{margin:0}
+.msg.bot ul,.msg.bot ol{margin:4px 0 8px;padding-left:20px}
+.msg.bot li{margin:2px 0}
+.msg.bot h4{margin:8px 0 4px;font-size:15px}
+.msg.bot code{background:#0c0f13;border:1px solid var(--line);padding:1px 5px;border-radius:5px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.msg.bot pre.code{background:#0c0f13;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;margin:6px 0}
+.msg.bot pre.code code{border:0;padding:0;background:none}
+.msg.bot a{color:var(--gold)}
 .composer{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--s1)}
 .composer textarea{min-height:44px;max-height:140px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
@@ -85,6 +96,8 @@ textarea{resize:vertical}
 .pbox input{border:0;border-radius:0;border-bottom:1px solid var(--line);background:transparent;padding:16px 18px}
 .pbox a{display:block;padding:11px 18px;color:var(--mu)}
 .pbox a:hover,.pbox a.sel{background:var(--s2);color:var(--tx)}
+#buyM,#joinM{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px}
+#buyM[hidden],#joinM[hidden]{display:none}
 .foot-site{border-top:1px solid var(--line);margin-top:60px;padding:26px 24px;color:var(--mu);font-size:13px;text-align:center;white-space:pre-line}
 @media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.cmd{grid-template-columns:1fr}.nav{order:3;width:100%}h1{font-size:34px}.msg{max-width:92%}}
 </style>
@@ -93,15 +106,24 @@ textarea{resize:vertical}
 <canvas id="embers" aria-hidden="true"></canvas>
 <header class="top">
   <div class="bar">
-    <a class="brand" href="#/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff3d00"/></linearGradient></defs><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-10z" fill="url(#g)"/></svg>Elite Uncopylocked</a>
+    <a class="brand" href="#/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff3d00"/></linearGradient></defs><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-10z" fill="url(#g)"/></svg><img id="brand-img" alt="" width="22" height="22" style="border-radius:6px;display:none">Elite Uncopylocked</a>
     <nav class="nav" id="nav"></nav>
-    <span class="pill" id="st">Guest</span>
+    <a class="btn pri sm" id="hjoin" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join Discord</a>
+    <div class="row" id="auth" style="margin:0;gap:8px"></div>
     <button class="kbd" id="kbd">Ctrl K</button>
   </div>
 </header>
 <main id="app"></main>
 <div class="foot-site">© 2026 Elite Uncopylocked. All Rights Reserved.
 For any problems, please DM @magmafox63911</div>
+<div id="buyM" hidden><div class="card" style="width:min(460px,100%)"><h3>Buy this file</h3><p class="mu" id="bm-info" style="margin:8px 0 6px"></p>
+<form id="buyF"><input type="hidden" name="listing" id="bm-id"><p class="meta" id="bm-as" style="margin-bottom:8px"></p>
+<div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Place order</button><button class="btn" type="button" id="bm-x">Close</button></div></form>
+<div id="bm-result" style="margin-top:12px"></div></div></div>
+<div id="joinM" hidden><div class="card" style="width:min(460px,100%);text-align:center"><div class="eyebrow">Join the server</div>
+<h3 id="jm-title">Join the Discord to continue</h3><p class="mu" id="jm-text" style="margin:10px 0 18px"></p>
+<div class="row" style="justify-content:center"><a class="btn pri" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join Discord</a><a class="btn" id="jm-login" href="/api/auth/discord/login">Sign in with Discord</a></div>
+<p style="margin-top:14px"><button class="link" id="jm-x" type="button">Maybe later</button></p></div></div>
 <div id="pal" hidden><div class="pbox"><input id="pq" placeholder="Jump to a page…"><div id="pl"></div></div></div>
 
 <script>
@@ -139,9 +161,9 @@ const BOT = {
 };
 const EMBED_FOOTER = "© 2026 Elite Uncopylocked. All Rights Reserved.\nFor any problems, please DM @magmafox63911";
 const CATS = ["Decompiled","Uncopylocked","Custom","Scripts","Maps","UI","VFX","Audio","Packs"];
-const ROUTES = [["home","Home"],["chat","AI Chat"],["files","Public Files"],["posts","Community"],["market","Marketplace"],["services","Services"],["jobs","Jobs"],["vip","VIP"],["commands","Bot Commands"],["team","Team"],["safety","Safety"],["support","Support"]];
+const ROUTES = [["home","Home"],["chat","AI Chat"],["files","Public Files"],["posts","Community"],["market","Marketplace"],["services","Services"],["jobs","Jobs"],["vip","VIP"],["commands","Bot Commands"],["team","Team"],["safety","Safety"],["support","Support"],["requests","File Requests"]];
 
-const RULES = `You are the assistant for Elite Uncopylocked, a Roblox creator community. Answer clearly and concisely. You help with Luau and Roblox scripting, game systems, UI, building, and using this community's site and bot.
+const RULES = `You are the assistant for Elite Uncopylocked, a Roblox creator community. Answer clearly and concisely. Format answers with Markdown: **bold** for key terms, short bullet or numbered lists for steps, and fenced code blocks for code. You help with Luau and Roblox scripting, game systems, UI, building, and using this community's site and bot.
 Facts you may state: Owner is Legend (@legend_demon_404). Chief and Bot Developer is Magma (@magmafox63911). Questions go to @magmafox63911.
 Bot slash commands (the only commands that exist): /setup, /welcomesetup, /boostrolesetup, /ticketpanel, /ticketsetup, /aichatsetup, /aichatoff, /balance, /chatstats, /daily, /pay, /payment, /tickets, /closeticket, /rank, /leaderboard, /addword, /removeword, /listwords, /modtoggle, /manexinfo, /dbstatus. Never invent other commands.
 Bot features: economy, leveling and ranks, ticket and payment tickets, moderation, giveaways, backup, reaction roles, boost rewards, welcome messages.
@@ -151,7 +173,7 @@ Only help with scripts and files the user has the rights to use. Do not help bre
 If you are not sure about something specific to this community, say so and point to @magmafox63911.`;
 
 /* ---------- Runtime state ---------- */
-const C = {discord:null,db:null,sample:null,assets:null,dl:null,user:null,me:null,posts:[],files:[],listings:[],jobs:[],names:{}};
+const C = {acct:null,requests:[],discord:null,db:null,sample:null,assets:null,dl:null,user:null,me:null,posts:[],files:[],listings:[],jobs:[],names:{}};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const when = t => t ? new Date(t).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "";
@@ -176,15 +198,17 @@ async function resolveNames(){
   ids.forEach(i => C.names[i] = (ps[i] && ps[i].name) || "Member");
   renderLive();
 }
-function postCard(p){return `<div class="card"><div class="meta">${esc(name(p.uid))} · ${when(p.at)}</div><p>${esc(p.text)}</p>${mine(p)?`<div><button class="link" data-del="posts|${p.id}">Delete</button></div>`:""}</div>`}
+function postCard(p){return `<div class="card"><div class="meta">${esc(p.author)} · ${when(p.created_at)}</div><p>${esc(p.text)}</p></div>`}
 function fileCard(f){return `<div class="card"><span class="tag">${esc(f.cat||"File")}</span><h3>${esc(f.title)}</h3><p class="mu">${esc(f.desc)}</p><div class="foot"><span class="meta">${esc(name(f.uid))} · ${when(f.at)}${f.size?` · ${(f.size/1048576).toFixed(1)} MB`:""}</span><button class="btn sm" data-dl="${esc(f.fileId)}|${esc(f.fileName)}">Download</button></div></div>`}
-function listCard(l){return `<div class="card"><span class="tag">${esc(l.cat)}</span><h3>${esc(l.title)}</h3><p class="mu">${esc(l.desc)}</p><div class="foot"><div><div class="price">$${Number(l.price).toFixed(2)}</div><span class="meta">${esc(name(l.uid))}</span></div><button class="btn pri sm" data-buy="1">Buy via ticket</button></div></div>`}
-function jobCard(j){return `<div class="card"><span class="tag">${esc(j.skill||"Job")}</span><h3>${esc(j.title)}</h3><p class="mu">${esc(j.desc)}</p><div class="foot"><span class="meta">Budget: ${esc(j.budget||"Negotiated directly")}</span><button class="btn sm" data-apply="1">Apply</button></div></div>`}
+function listCard(l){return `<div class="card"><span class="tag">${esc(l.cat)}</span><h3>${esc(l.title)}</h3><p class="mu">${esc(l.description)}</p><div class="foot"><div><div class="price">$${Number(l.price).toFixed(2)}</div><span class="meta">by ${esc(l.seller)}</span></div><button class="btn pri sm" data-buy="${esc(l.id)}">Buy</button></div></div>`}
+function reqCard(r){return `<div class="card"><span class="tag">${esc(r.cat)}</span><h3>${esc(r.title)}</h3><p class="mu">${esc(r.description)}</p><div class="foot"><span class="meta">${r.budget ? "Budget: "+esc(r.budget)+" · " : ""}by ${esc(r.requester)}</span></div></div>`}
+function jobCard(j){return `<div class="card"><span class="tag">${esc(j.skill)}</span><h3>${esc(j.title)}</h3><p class="mu">${esc(j.description)}</p><div class="foot"><span class="meta">Budget: ${esc(j.budget || "Negotiated directly")} · by ${esc(j.poster)}</span></div></div>`}
 function renderLive(){
   const put = (id, arr, fn, emptyMsg) => { const el = $("#"+id); if (el) el.innerHTML = arr.length ? arr.map(fn).join("") : empty(emptyMsg); };
   put("feed-posts", C.posts, postCard, "No posts yet. Start the conversation.");
   put("feed-files", C.files, fileCard, "No public files yet. Be the first to share one.");
   put("feed-market", C.listings, listCard, "No listings yet. Sell your first file below.");
+  put("feed-requests", C.requests, reqCard, "No requests yet. Post the first one.");
   put("feed-jobs", C.jobs, jobCard, "No jobs posted yet.");
   document.querySelectorAll("[data-count]").forEach(el => el.textContent = C[el.dataset.count]?.length ?? 0);
   paintDiscord();
@@ -197,7 +221,13 @@ function paintDiscord(){
   set("dc-online", d && d.online != null ? d.online.toLocaleString() : "—");
   set("dc-name", (d && d.name) || "Elite Uncopylocked");
   set("dc-desc", !d ? "Loading live stats…" : d.members != null ? (d.desc || "Official community server") : "Live stats unavailable right now.");
-  const ic = $("#dc-icon"); if (ic && d && d.icon) { ic.src = d.icon; ic.style.display = "block"; }
+  const hj = $("#hjoin"); if (hj && d && d.members != null) hj.textContent = "Join Discord · " + d.members.toLocaleString() + " members";
+  if (d && d.icon) {
+    const ic = $("#dc-icon"); if (ic) { ic.src = d.icon; ic.style.display = "block"; }
+    const bi = $("#brand-img"); if (bi) { bi.src = d.icon; bi.style.display = "inline-block"; const sv = bi.previousElementSibling; if (sv) sv.style.display = "none"; }
+    const f = $("#fav"); if (f) f.href = d.icon;
+    const a = $("#apple"); if (a) a.href = d.icon;
+  }
 }
 function discordFrom(j){
   const g = j.guild || {};
@@ -240,8 +270,17 @@ const P = {
     </section>
     <section class="sec"><div class="sec-h"><div><h2>Explore</h2><p class="lead" style="margin-top:6px">Everything in one place.</p></div></div>
       <div class="grid">
-        ${[["chat","AI Assistant","Ask about scripting, the bot, VIP, and payments."],["files","Public Files","Upload and download free community files."],["market","Marketplace","Buy and sell scripts, decompiled and custom work."],["posts","Community","Post updates, ask questions, and share wins."],["services","Services","Commission custom scripts, maps, and UI."],["jobs","Jobs","Hire developers or find your next project."],["vip","VIP","Get your VIP ID and role."],["commands","Bot Commands","Every command the Elite Uncopylocked bot supports."]].map(([k,t,d])=>`<a class="card" href="#/${k}"><h3>${t}</h3><p class="mu">${d}</p></a>`).join("")}
+        ${[["chat","AI Assistant","Ask about scripting, the bot, VIP, and payments."],["files","Public Files","Upload and download free community files."],["market","Marketplace","Buy and sell scripts, decompiled and custom work."],["posts","Community","Post updates, ask questions, and share wins."],["services","Services","Commission custom scripts, maps, and UI."],["jobs","Jobs","Hire developers or find your next project."],["requests","File Requests","Ask the community for a file."],["vip","VIP","Get your VIP ID and role."],["commands","Bot Commands","Every command the Elite Uncopylocked bot supports."]].map(([k,t,d])=>`<a class="card" href="#/${k}"><h3>${t}</h3><p class="mu">${d}</p></a>`).join("")}
       </div></section>
+    <section class="sec"><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:28px">
+      <div><div class="eyebrow">Join the community</div><h2>Get more out of Elite Uncopylocked</h2><p class="lead" style="margin-top:8px">Members can buy and sell files, post file requests, open support tickets, climb the ranks, and join giveaways.</p></div>
+      <div class="row"><a class="btn pri" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join the Discord</a><a class="btn" href="/api/auth/discord/login">Sign in with Discord</a></div></div>
+    <div class="grid" style="margin-top:16px">
+      <div class="card"><h3>Buy and sell</h3><p class="mu">Browse decompiled, uncopylocked, and custom files, or list your own.</p></div>
+      <div class="card"><h3>Request files</h3><p class="mu">Post what you need and let sellers and the community reply.</p></div>
+      <div class="card"><h3>Ranks and economy</h3><p class="mu">Chat to earn XP and coins, check /rank, /balance, and /leaderboard.</p></div>
+      <div class="card"><h3>Giveaways and updates</h3><p class="mu">Win prizes and get announcements first, only in the server.</p></div>
+    </div></section>
     <section class="sec"><h2>Bot features</h2><p class="lead" style="margin-bottom:16px">The Elite Uncopylocked Discord bot includes:</p>
       <div class="row">${BOT.features.map(f=>`<span class="pill">${esc(f)}</span>`).join("")}</div></section>
   </div>`,
@@ -277,14 +316,17 @@ const P = {
     </div></div>`,
 
   market: () => `<div class="wrap"><div class="eyebrow">Marketplace</div><h1 style="font-size:34px">Buy and sell files</h1>
-    <p class="lead" style="margin-bottom:22px">Sell decompiled, uncopylocked, and custom work. Buyers pay and receive files through a Discord ticket, so staff and sellers can confirm the deal.</p>
+    <p class="lead" style="margin-bottom:22px">Sell decompiled, uncopylocked, and custom work. Buyers pay and receive files through a Discord ticket, Buyers pay through a Discord ticket, and staff confirm payment before the file link is released.</p>
+    <div class="card" style="margin-bottom:22px;max-width:620px"><h3>Check an order</h3><p class="meta" style="margin:6px 0 12px">Enter the order code shown after you placed an order.</p>
+      <div class="row" style="margin:0"><input id="oc" placeholder="Order code" style="max-width:260px"><button class="btn" id="ob" type="button">Check</button></div><div id="or" class="mu" style="margin-top:12px"></div></div>
     <div class="two" style="grid-template-columns:1fr 1.4fr;align-items:start">
       <div class="card"><h3>List a file for sale</h3><form id="listF">
+        
         <label>Title</label><input name="title" required maxlength="80">
         <label>Category</label><select name="cat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
         <label>Price (USD)</label><input name="price" type="number" min="1" step="0.01" required>
         <label>Description</label><textarea name="desc" rows="3" maxlength="300" required></textarea>
-        <p class="meta" style="margin-top:12px">Only list files you have the rights to sell. You deliver the file after the buyer's payment is confirmed in a ticket.</p>
+        <label>File link (https, shared after payment)</label><input name="fileUrl" required placeholder="https://..."><p class="meta" style="margin-top:12px">Only list files you have the rights to sell. The link stays hidden until staff confirm payment.</p>
         <div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Publish listing</button></div></form></div>
       <div class="grid" id="feed-market" style="grid-template-columns:1fr 1fr"></div>
     </div></div>`,
@@ -321,6 +363,18 @@ const P = {
         <div class="row" style="margin-top:14px"><button class="btn" type="submit">Submit report</button></div></form></div>
     </div></div>`,
 
+  requests: () => `<div class="wrap"><div class="eyebrow">File requests</div><h1 style="font-size:34px">Request a file</h1>
+    <p class="lead" style="margin-bottom:22px">Can't find what you need? Post a request. Sellers and the community can pick it up in Discord.</p>
+    <div class="two" style="grid-template-columns:1fr 1.4fr;align-items:start">
+      <div class="card"><h3>New request</h3><form id="reqF">
+        <label>Title</label><input name="title" required maxlength="80">
+        <label>Category</label><select name="cat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+        <label>Budget (optional)</label><input name="budget" maxlength="40" placeholder="e.g. $50">
+        <label>Description</label><textarea name="description" rows="4" maxlength="300" required></textarea>
+        
+        <div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Post request</button></div></form></div>
+      <div class="grid" id="feed-requests" style="grid-template-columns:1fr"></div>
+    </div></div>`,
   support: () => `<div class="wrap"><div class="eyebrow">Support</div><h1 style="font-size:34px">Get help</h1><p class="lead" style="margin-bottom:22px">For payments, open a ticket. Staff can confirm details in the ticket channel.</p>
     <div class="two"><div class="card"><h3>Send a message</h3><form id="tkF"><label>Subject</label><input name="s" required placeholder="Payment, upload, VIP, or other">
       <label>Message</label><textarea name="m" rows="4" required></textarea><div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Send</button></div></form></div>
@@ -368,7 +422,11 @@ document.addEventListener("click", async e => {
     catch { toast("Download unavailable right now."); }
     return;
   }
-  if (e.target.closest("[data-buy]")) return toast("To buy, open a ticket with /payment in Discord or DM @magmafox63911.");
+  const buy = e.target.closest("[data-buy]"); if (buy) return openBuy(buy.dataset.buy);
+  if (e.target.closest("#bm-x") || e.target.id === "buyM") { $("#buyM").hidden = true; return; }
+  if (e.target.closest("#jm-x") || e.target.id === "joinM") { $("#joinM").hidden = true; return; }
+  if (e.target.closest("#ob")) return checkOrder();
+  if (e.target.closest("#pbtn")) return submitProof();
   if (e.target.closest("[data-apply]")) return toast("To apply, open a ticket in Discord and mention the job.");
 });
 
@@ -381,9 +439,11 @@ document.addEventListener("submit", async e => {
   const v = Object.fromEntries(new FormData(f));
   const btn = f.querySelector("[type=submit]"); if (btn) btn.disabled = true;
   try {
-    if (f.id === "postF") { if (!needDB()) return; await addDoc("posts",{text:v.t.trim(), uid:C.me, at:Date.now()}); f.reset(); toast("Posted."); }
-    else if (f.id === "listF") { if (!needDB()) return; await addDoc("listings",{title:v.title, cat:v.cat, price:Number(v.price), desc:v.desc, uid:C.me, at:Date.now()}); f.reset(); toast("Listing published."); }
-    else if (f.id === "jobF") { if (!needDB()) return; await addDoc("jobs",{title:v.title, skill:v.skill, budget:v.budget, desc:v.desc, uid:C.me, at:Date.now()}); f.reset(); toast("Job posted."); }
+    if (f.id === "postF") { if (!gate("post in the community")) return; await postJSON("/api/posts", {text:v.t}); f.reset(); toast("Posted."); await loadCommunity(); }
+    else if (f.id === "listF") { if (!gate("sell files")) return; await postJSON("/api/listings", {title:v.title, cat:v.cat, price:v.price, description:v.desc, seller:v.seller, fileUrl:v.fileUrl}); f.reset(); toast("Listing published."); await loadMarket(); }
+    else if (f.id === "reqF") { if (!gate("request files")) return; await postJSON("/api/requests", v); f.reset(); toast("Request posted."); await loadMarket(); }
+    else if (f.id === "buyF") { await placeOrder(v); }
+    else if (f.id === "jobF") { if (!gate("post a job")) return; await postJSON("/api/jobs", v); f.reset(); toast("Job posted."); await loadCommunity(); }
     else if (f.id === "fileF") {
       if (!C.assets) return toast("Uploads need Contributor access to this page.");
       if (!needDB()) return;
@@ -395,7 +455,7 @@ document.addEventListener("submit", async e => {
     else if (f.id === "rsF") { toast("Report received. Thank you."); f.reset(); }
     else if (f.id === "tkF") { toast("Ticket sent. Staff will reply in your ticket."); f.reset(); }
   } catch (err) {
-    toast(err && err.code === "too_large" ? "That file is too large (max 20 MB)." : err && err.code === "unsupported_type" ? "That file type isn't supported." : "Something went wrong. Please try again.");
+    toast(err && err.message && !err.code ? err.message : err && err.code === "too_large" ? "That file is too large (max 20 MB)." : err && err.code === "unsupported_type" ? "That file type isn't supported." : "Something went wrong. Please try again.");
   } finally { if (btn) btn.disabled = false; }
 });
 
@@ -414,14 +474,14 @@ document.addEventListener("submit", async e => {
   ctl = new AbortController();
   const sent = turns.slice(-16); while (sent.length && sent[0].role !== "user") sent.shift();
   try {
-    const r = await askAI(sent, ctl.signal, ({text})=>{ bubble.textContent = text; });
-    bubble.textContent = r.text; turns.push({role:"assistant", content:r.text});
+    const r = await askAI(sent, ctl.signal, ({text})=>{ bubble.innerHTML = md(text); });
+    bubble.innerHTML = md(r.text); turns.push({role:"assistant", content:r.text});
   } catch (err) {
     const msg = err.code === "rate_limited" ? "Too many requests right now. Try again in a moment."
       : err.code === "cancelled" ? "Stopped."
       : err.code === "not_granted" ? "The assistant isn't connected yet."
       : "I couldn't finish that reply. Please try again.";
-    bubble.textContent = err.text || msg;
+    bubble.innerHTML = md(err.text || msg);
     if (err.text) turns.push({role:"assistant", content:err.text});
   } finally { $("#send").hidden = false; $("#stop").hidden = true; ctl = null; }
 });
@@ -470,19 +530,150 @@ for (let i = 0; i < 70; i++) pts.push(spark(true));
   requestAnimationFrame(frame);
 })();
 
+/* ---------- Markdown for chat replies (escapes HTML first) ---------- */
+function inline(t){
+  return t.replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+function md(src){
+  return String(src ?? "").split("```").map((part, i) => {
+    if (i % 2 === 1) return `<pre class="code"><code>${esc(part.replace(/^[\w+-]*\n/, "").replace(/\n$/, ""))}</code></pre>`;
+    let html = "", list = null;
+    const close = () => { if (list) { html += `</${list}>`; list = null; } };
+    for (const line of esc(part).split("\n")){
+      let m;
+      if ((m = line.match(/^\s*[-*]\s+(.*)/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul"; } html += `<li>${inline(m[1])}</li>`; continue; }
+      if ((m = line.match(/^\s*\d+\.\s+(.*)/))) { if (list !== "ol") { close(); html += "<ol>"; list = "ol"; } html += `<li>${inline(m[1])}</li>`; continue; }
+      close();
+      if ((m = line.match(/^#{1,3}\s+(.*)/))) { html += `<h4>${inline(m[1])}</h4>`; continue; }
+      if (!line.trim()) continue;
+      html += `<p>${inline(line)}</p>`;
+    }
+    close();
+    return html;
+  }).join("");
+}
+
+/* ---------- Marketplace, requests and orders (Vercel Postgres via /api) ---------- */
+async function postJSON(path, obj){
+  const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(obj)});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "Something went wrong.");
+  return j;
+}
+async function loadMarket(){
+  try {
+    const [l, q] = await Promise.all([fetch("/api/listings").then(r => r.json()), fetch("/api/requests").then(r => r.json())]);
+    C.listings = l.listings || []; C.requests = q.requests || []; renderLive();
+  } catch {}
+}
+function openBuy(id){
+  if (!gate("buy files")) return;
+  const l = C.listings.find(x => String(x.id) === String(id));
+  if (!l) return toast("That listing is no longer available.");
+  $("#bm-id").value = l.id;
+  $("#bm-info").textContent = `${l.title} · $${Number(l.price).toFixed(2)} · sold by ${l.seller}`;
+  $("#bm-result").textContent = "";
+  $("#buyM").hidden = false;
+  $("#buyF input[name=buyer]").focus();
+}
+async function placeOrder(v){
+  const r = await postJSON("/api/orders", {listingId:v.listing});
+  const box = $("#bm-result"); box.textContent = "";
+  const p1 = document.createElement("p"); p1.textContent = `Order #${r.id} placed. Your order code is:`;
+  const code = document.createElement("div"); code.className = "price"; code.style.letterSpacing = ".15em"; code.textContent = r.code;
+  const p2 = document.createElement("p"); p2.className = "mu"; p2.style.marginTop = "10px";
+  p2.textContent = "Open a ticket with /payment in Discord and send this code. Once staff confirm payment, check your order under Check an order on the Marketplace page.";
+  box.append(p1, code, p2);
+  $("#buyF").reset();
+}
+async function checkOrder(){
+  const code = $("#oc").value.trim().toUpperCase(), out = $("#or");
+  out.textContent = "Checking…";
+  try {
+    const r = await fetch("/api/orders?code=" + encodeURIComponent(code));
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "Order not found.");
+    out.textContent = "";
+    const t = document.createElement("p"); t.textContent = `${j.listing.title} · status: ${j.status}`; out.append(t);
+    if (j.fileUrl) {
+      const a = document.createElement("a"); a.className = "btn pri sm"; a.style.display = "inline-flex"; a.style.marginTop = "8px";
+      a.href = j.fileUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open your file"; out.append(a);
+    } else {
+      const n = document.createElement("p"); n.className = "mu"; n.textContent = "The file link appears here once staff confirm payment.";
+      out.append(n);
+    }
+    if (!j.fileUrl) {
+      C.code = code;
+      const box = document.createElement("div"); box.style.marginTop = "14px";
+      box.innerHTML = `<label>Proof of payment</label><textarea id="pf" rows="2" maxlength="300" placeholder="Link to your payment screenshot, or the transaction ID"></textarea><div class="row" style="margin-top:8px"><button class="btn sm" id="pbtn" type="button">Submit proof</button></div>`;
+      out.append(box);
+    }
+  } catch (err) { out.textContent = err.message || "Order not found."; }
+}
+
+/* ---------- Accounts and Discord membership ---------- */
+async function loadMe(){
+  try { const j = await fetch("/api/me").then(r => r.json()); C.acct = j.user || null; } catch { C.acct = null; }
+  paintAuth();
+  const flag = new URLSearchParams(location.search).get("auth");
+  if (flag === "failed") toast("Sign-in didn't finish. Please try again.");
+  if (flag === "ok") toast(C.acct && C.acct.member ? "Welcome! You're verified as a server member." : "Signed in. Join the Discord server to buy, sell and request files.");
+  if (flag) history.replaceState(null, "", location.pathname + location.hash);
+}
+function paintAuth(){
+  const el = $("#auth"); if (!el) return;
+  const a = C.acct;
+  el.innerHTML = a
+    ? `<span class="pill ${a.member ? "on" : ""}" style="display:inline-flex;align-items:center;gap:6px"><img src="${esc(a.avatar)}" alt="" width="18" height="18" style="border-radius:50%">${esc(a.name)}${a.member ? " · member" : ""}</span><a class="btn sm" href="/api/auth/logout">Sign out</a>`
+    : `<a class="btn sm" href="/api/auth/discord/login">Sign in with Discord</a><a class="btn sm" href="/api/auth/google/login">Google</a>`;
+}
+function showJoin(text){
+  $("#jm-text").textContent = text;
+  $("#jm-login").textContent = C.acct ? "Re-check Discord membership" : "Sign in with Discord";
+  $("#joinM").hidden = false;
+}
+function gate(action){
+  if (C.acct && C.acct.member) return true;
+  showJoin(C.acct
+    ? `You're signed in with ${C.acct.provider === "google" ? "Google" : "Discord"}, but to ${action} you need to be a server member. Join the server, then sign in with Discord.`
+    : `Sign in with Discord and join the server to ${action}.`);
+  return false;
+}
+function showJoinNudge(){
+  const last = Number(localStorage.getItem("eu_join_nudge") || 0);
+  if (Date.now() - last < 86400000 || (C.acct && C.acct.member)) return;
+  localStorage.setItem("eu_join_nudge", String(Date.now()));
+  showJoin("Join the Elite Uncopylocked server to buy, sell and request files, and to get giveaways and updates.");
+}
+
+/* ---------- Community posts, jobs and proof ---------- */
+async function loadCommunity(){
+  try {
+    const [p, j] = await Promise.all([fetch("/api/posts").then(r => r.json()), fetch("/api/jobs").then(r => r.json())]);
+    C.posts = p.posts || []; C.jobs = j.jobs || []; renderLive();
+  } catch {}
+}
+async function submitProof(){
+  const proof = $("#pf").value.trim();
+  if (!proof) return toast("Paste a link or transaction ID first.");
+  try { await postJSON("/api/proof", {code:C.code, proof}); toast("Proof sent. Staff will review it and deliver your file."); $("#pf").value = ""; }
+  catch (err) { toast(err.message); }
+}
+
 /* ---------- Boot ---------- */
 async function boot(){
   [C.db, C.sample, C.assets, C.dl, C.user] = await Promise.all(["db","sample","assets","downloads","user"].map(use));
   if (C.user) C.me = await C.user.id().catch(() => null);
   const signed = !!C.me; if (!C.me) C.me = guestId();
-  $("#st").textContent = signed ? "Signed in" : "Guest";
-  $("#st").classList.toggle("on", signed);
-  if (!C.db) { ["posts","files","listings","jobs"].forEach(k => C[k] = localList(k)); }
+  paintAuth();
+  if (!C.db) { ["posts","files","jobs"].forEach(k => C[k] = localList(k)); }
   renderLive();
   if (C.db) {
     sub("posts", v => C.posts = v);
     sub("files", v => C.files = v);
-    sub("listings", v => C.listings = v);
     sub("jobs", v => C.jobs = v);
   }
   renderLive();
@@ -490,6 +681,10 @@ async function boot(){
 route();
 boot();
 loadDiscord();
+loadMarket();
+loadCommunity();
+loadMe();
+setTimeout(showJoinNudge, 9000);
 setInterval(loadDiscord, 300000);
 </script>
 </body>
