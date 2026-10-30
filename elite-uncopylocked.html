@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elite Uncopylocked</title>
+<style>
+:root{--bg:#0b0d10;--s1:#12151a;--s2:#181c22;--line:#262b33;--tx:#e7e9ee;--mu:#8e96a3;--ember:#ff6b2c;--ember2:#ff3d00;--gold:#ffb547}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{margin:0;letter-spacing:-.01em;font-weight:650}
+h1{font-size:44px;line-height:1.1}h2{font-size:26px}h3{font-size:17px}
+p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 64px}
+#embers{position:fixed;inset:0;pointer-events:none;z-index:0}
+main,.foot-site{position:relative;z-index:1}
+.top{position:sticky;top:0;z-index:10;background:rgba(11,13,16,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--ember),var(--gold),transparent);background-size:200% 100%;animation:heat 6s linear infinite;opacity:.8}
+@keyframes heat{to{background-position:200% 0}}
+.bar{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em}
+.nav{display:flex;gap:2px;flex-wrap:wrap;flex:1}
+.nav a{padding:7px 11px;border-radius:7px;color:var(--mu);font-size:14px}
+.nav a:hover{color:var(--tx);background:var(--s2)}
+.nav a.on{color:var(--tx);background:var(--s2);box-shadow:inset 0 -2px 0 var(--ember)}
+.pill{font-size:12px;color:var(--mu);border:1px solid var(--line);padding:5px 10px;border-radius:99px}
+.pill.on{color:#8ff0b0;border-color:#1f4d33}
+.kbd{font-size:12px;color:var(--mu);border:1px solid var(--line);border-radius:6px;padding:3px 7px;cursor:pointer;background:none;font-family:inherit}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:9px;border:1px solid var(--line);background:var(--s2);color:var(--tx);font-weight:600;font-size:14px;font-family:inherit;cursor:pointer;transition:.15s}
+.btn:hover{border-color:#3a414d}
+.btn.pri{background:linear-gradient(180deg,#ff7d3d,var(--ember2));border-color:transparent;color:#fff;box-shadow:0 6px 20px -8px rgba(255,92,30,.7)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:6px 11px;font-size:13px}
+.link{background:none;border:0;color:var(--mu);cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+.link:hover{color:var(--ember)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);font-weight:600;margin-bottom:10px}
+.lead{color:var(--mu);font-size:17px;max-width:620px;margin-top:12px}
+.hero{position:relative;padding:72px 0 48px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto;height:520px;background:radial-gradient(closest-side,rgba(255,107,44,.22),transparent);filter:blur(10px);pointer-events:none;animation:glow 7s ease-in-out infinite alternate}
+@keyframes glow{to{transform:translateY(30px) scale(1.06);opacity:.8}}
+.hero>*{position:relative}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
+.stat{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:18px}
+.stat b{display:block;font-size:26px;letter-spacing:-.02em}
+.stat span{color:var(--mu);font-size:13px}
+.sec{margin-top:52px}
+.sec-h{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{background:linear-gradient(180deg,var(--s1),#0f1216);border:1px solid var(--line);border-radius:14px;padding:20px;transition:.2s;display:flex;flex-direction:column;gap:10px}
+.card:hover{border-color:#3d2a20;box-shadow:0 14px 40px -22px rgba(255,107,44,.45);transform:translateY(-2px)}
+.card p.mu{color:var(--mu);font-size:14px}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.2);padding:3px 8px;border-radius:6px;align-self:flex-start}
+.meta{color:var(--mu);font-size:13px}
+.price{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+label{display:block;font-size:13px;color:var(--mu);margin:14px 0 6px;font-weight:500}
+input,select,textarea{width:100%;background:#0c0f13;border:1px solid var(--line);color:var(--tx);padding:10px 12px;border-radius:9px;font:inherit}
+input[type=file]{padding:8px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ember);box-shadow:0 0 0 3px rgba(255,107,44,.15)}
+textarea{resize:vertical}
+.empty{color:var(--mu);border:1px dashed var(--line);border-radius:12px;padding:28px;text-align:center}
+.chat{display:flex;flex-direction:column;height:calc(100vh - 220px);min-height:480px;background:var(--s1);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.log{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:78%;padding:11px 15px;border-radius:12px;white-space:pre-wrap;font-size:15px}
+.msg.me{align-self:flex-end;background:var(--s2);border:1px solid var(--line)}
+.msg.bot{align-self:flex-start;background:linear-gradient(180deg,#1a1d23,#14171c);border:1px solid #2c2620}
+.msg.bot::before{content:"Assistant";display:block;font-size:11px;color:var(--ember);font-weight:600;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.composer{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--s1)}
+.composer textarea{min-height:44px;max-height:140px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chips button{background:var(--s2);border:1px solid var(--line);color:var(--mu);padding:7px 12px;border-radius:99px;cursor:pointer;font-size:13px;font-family:inherit}
+.chips button:hover{color:var(--tx);border-color:#3a414d}
+.cmd{display:grid;grid-template-columns:200px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cmd code{color:var(--gold);font-family:ui-monospace,Menlo,monospace}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--line);border-top:2px solid var(--ember);color:var(--tx);padding:12px 18px;border-radius:10px;box-shadow:0 20px 40px -20px #000;z-index:20;font-size:14px;animation:up .25s ease}
+@keyframes up{from{opacity:0;transform:translate(-50%,8px)}}
+#pal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:30;display:flex;justify-content:center;padding-top:14vh}
+#pal[hidden]{display:none}
+.pbox{width:min(560px,92vw);background:var(--s1);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px -20px #000;align-self:flex-start}
+.pbox input{border:0;border-radius:0;border-bottom:1px solid var(--line);background:transparent;padding:16px 18px}
+.pbox a{display:block;padding:11px 18px;color:var(--mu)}
+.pbox a:hover,.pbox a.sel{background:var(--s2);color:var(--tx)}
+.foot-site{border-top:1px solid var(--line);margin-top:60px;padding:26px 24px;color:var(--mu);font-size:13px;text-align:center;white-space:pre-line}
+@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.cmd{grid-template-columns:1fr}.nav{order:3;width:100%}h1{font-size:34px}.msg{max-width:92%}}
+</style>
+</head>
+<body>
+<canvas id="embers" aria-hidden="true"></canvas>
+<header class="top">
+  <div class="bar">
+    <a class="brand" href="#/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff3d00"/></linearGradient></defs><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-10z" fill="url(#g)"/></svg>Elite Uncopylocked</a>
+    <nav class="nav" id="nav"></nav>
+    <span class="pill" id="st">Guest</span>
+    <button class="kbd" id="kbd">Ctrl K</button>
+  </div>
+</header>
+<main id="app"></main>
+<div class="foot-site">© 2026 Elite Uncopylocked. All Rights Reserved.
+For any problems, please DM @magmafox63911</div>
+<div id="pal" hidden><div class="pbox"><input id="pq" placeholder="Jump to a page…"><div id="pl"></div></div></div>
+
+<script>
+/* ---------- Data from the Elite Uncopylocked bot ---------- */
+const BOT = {
+  commands: [
+    ["/setup","Setup bot configuration"],["/welcomesetup","Setup welcome message for new members"],["/boostrolesetup","Setup boost role"],
+    ["/ticketpanel","Create a ticket creation panel"],["/ticketsetup","Setup ticket system"],["/aichatsetup","Set the channel where AI chats freely (no mention needed)"],
+    ["/aichatoff","Disable or re-enable AI chat"],["/balance","Check your balance"],["/chatstats","View your chat statistics and earnings"],
+    ["/daily","Claim daily reward"],["/pay","Send money to another user"],["/payment","Payment support and help"],
+    ["/tickets","View all open tickets"],["/closeticket","Close a ticket"],["/rank","Check your rank and XP"],["/leaderboard","View top users"],
+    ["/addword","Add a word to the ban list"],["/removeword","Remove a word from the ban list"],["/listwords","List all banned words"],
+    ["/modtoggle","Toggle moderation"],["/manexinfo","Information overview (sent privately)"],["/dbstatus","Check database status"]
+  ],
+  features: ["Economy","Leveling and ranks","Ticket system with payment tickets","Moderation and word filter","Giveaways","Backup","Reaction roles","Boost rewards","Welcome messages","AI chat assistant"],
+  vip: "VIP members get a unique VIP ID issued by the bot (VIP-1, VIP-2, and so on) and the VIP role in the Discord server.",
+  team: [
+    {n:"Legend",h:"@legend_demon_404",r:"Owner"},
+    {n:"Magma",h:"@magmafox63911",r:"Chief & Bot Developer"}
+  ],
+  services: [
+    {t:"Custom scripts",d:"Gameplay systems, data saving, and tools for your game."},
+    {t:"Decompiled & uncopylocked work",d:"Review, clean up, and adapt scripts and assets you have the rights to use."},
+    {t:"Map building",d:"Obbies, hubs, simulators, and arenas."},
+    {t:"UI & VFX",d:"Menus, HUDs, particles, and effects."}
+  ],
+  safety: [
+    "Check identities and proof of work before any deal.",
+    "Agree on deliverables, milestones, and payment before paying.",
+    "Be cautious of pressure to pay immediately.",
+    "Never share passwords, session tokens, or recovery codes.",
+    "Verify the network and wallet address before sending cryptocurrency.",
+    "Staff do not hold funds or guarantee private deals."
+  ]
+};
+const EMBED_FOOTER = "© 2026 Elite Uncopylocked. All Rights Reserved.\nFor any problems, please DM @magmafox63911";
+const CATS = ["Decompiled","Uncopylocked","Custom","Scripts","Maps","UI","VFX","Audio","Packs"];
+const ROUTES = [["home","Home"],["chat","AI Chat"],["files","Public Files"],["posts","Community"],["market","Marketplace"],["services","Services"],["jobs","Jobs"],["vip","VIP"],["commands","Bot Commands"],["team","Team"],["safety","Safety"],["support","Support"]];
+
+const RULES = `You are the assistant for Elite Uncopylocked, a Roblox creator community. Answer clearly and concisely. You help with Luau and Roblox scripting, game systems, UI, building, and using this community's site and bot.
+Facts you may state: Owner is Legend (@legend_demon_404). Chief and Bot Developer is Magma (@magmafox63911). Questions go to @magmafox63911.
+Bot slash commands (the only commands that exist): /setup, /welcomesetup, /boostrolesetup, /ticketpanel, /ticketsetup, /aichatsetup, /aichatoff, /balance, /chatstats, /daily, /pay, /payment, /tickets, /closeticket, /rank, /leaderboard, /addword, /removeword, /listwords, /modtoggle, /manexinfo, /dbstatus. Never invent other commands.
+Bot features: economy, leveling and ranks, ticket and payment tickets, moderation, giveaways, backup, reaction roles, boost rewards, welcome messages.
+VIP: members get a VIP ID such as VIP-1 and the VIP role in Discord. Do not invent prices or VIP perks beyond this.
+Payments: for payment problems send users to /payment. Never claim a payment was verified or a role was granted. Staff do not hold funds or guarantee deals. Warn users to verify identities, agree on deliverables first, and never share passwords, tokens, or recovery codes.
+Only help with scripts and files the user has the rights to use. Do not help break protections on someone else's paid or private content, and say so briefly when it applies.
+If you are not sure about something specific to this community, say so and point to @magmafox63911.`;
+
+/* ---------- Runtime state ---------- */
+const C = {discord:null,db:null,sample:null,assets:null,dl:null,user:null,me:null,posts:[],files:[],listings:[],jobs:[],names:{}};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const when = t => t ? new Date(t).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "";
+const name = uid => C.names[uid] || "Member";
+const mine = x => C.me && x.uid === C.me;
+const empty = m => `<div class="empty">${m}</div>`;
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
+const use = n => (window.claude ? claude.use(n) : Promise.resolve(null)).catch(() => null);
+
+/* ---------- Live data (db) ---------- */
+function sub(col, set){
+  C.db.collection(col).orderBy("at","desc").limit(200).onSnapshot(
+    s => { set(s.docs.map(d => ({id:d.id, ...(d.data() || {})}))); renderLive(); resolveNames(); },
+    e => console.warn(col, e.message)
+  );
+}
+async function resolveNames(){
+  const all = [...C.posts, ...C.files, ...C.listings, ...C.jobs].map(x => x.uid).filter(Boolean);
+  const ids = [...new Set(all)].filter(i => !(i in C.names));
+  if (!ids.length || !C.user) return;
+  const ps = await C.user.profiles(ids).catch(() => ({}));
+  ids.forEach(i => C.names[i] = (ps[i] && ps[i].name) || "Member");
+  renderLive();
+}
+function postCard(p){return `<div class="card"><div class="meta">${esc(name(p.uid))} · ${when(p.at)}</div><p>${esc(p.text)}</p>${mine(p)?`<div><button class="link" data-del="posts|${p.id}">Delete</button></div>`:""}</div>`}
+function fileCard(f){return `<div class="card"><span class="tag">${esc(f.cat||"File")}</span><h3>${esc(f.title)}</h3><p class="mu">${esc(f.desc)}</p><div class="foot"><span class="meta">${esc(name(f.uid))} · ${when(f.at)}${f.size?` · ${(f.size/1048576).toFixed(1)} MB`:""}</span><button class="btn sm" data-dl="${esc(f.fileId)}|${esc(f.fileName)}">Download</button></div></div>`}
+function listCard(l){return `<div class="card"><span class="tag">${esc(l.cat)}</span><h3>${esc(l.title)}</h3><p class="mu">${esc(l.desc)}</p><div class="foot"><div><div class="price">$${Number(l.price).toFixed(2)}</div><span class="meta">${esc(name(l.uid))}</span></div><button class="btn pri sm" data-buy="1">Buy via ticket</button></div></div>`}
+function jobCard(j){return `<div class="card"><span class="tag">${esc(j.skill||"Job")}</span><h3>${esc(j.title)}</h3><p class="mu">${esc(j.desc)}</p><div class="foot"><span class="meta">Budget: ${esc(j.budget||"Negotiated directly")}</span><button class="btn sm" data-apply="1">Apply</button></div></div>`}
+function renderLive(){
+  const put = (id, arr, fn, emptyMsg) => { const el = $("#"+id); if (el) el.innerHTML = arr.length ? arr.map(fn).join("") : empty(emptyMsg); };
+  put("feed-posts", C.posts, postCard, "No posts yet. Start the conversation.");
+  put("feed-files", C.files, fileCard, "No public files yet. Be the first to share one.");
+  put("feed-market", C.listings, listCard, "No listings yet. Sell your first file below.");
+  put("feed-jobs", C.jobs, jobCard, "No jobs posted yet.");
+  document.querySelectorAll("[data-count]").forEach(el => el.textContent = C[el.dataset.count]?.length ?? 0);
+  paintDiscord();
+}
+
+/* ---------- Live Discord stats ---------- */
+function paintDiscord(){
+  const d = C.discord, set = (id, v) => { const el = $("#"+id); if (el) el.textContent = v; };
+  set("dc-members", d && d.members != null ? d.members.toLocaleString() : "—");
+  set("dc-online", d && d.online != null ? d.online.toLocaleString() : "—");
+  set("dc-name", (d && d.name) || "Elite Uncopylocked");
+  set("dc-desc", !d ? "Loading live stats…" : d.members != null ? (d.desc || "Official community server") : "Live stats unavailable right now.");
+  const ic = $("#dc-icon"); if (ic && d && d.icon) { ic.src = d.icon; ic.style.display = "block"; }
+}
+function discordFrom(j){
+  const g = j.guild || {};
+  return {name:g.name, desc:g.description || null, icon: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128` : null, members:j.approximate_member_count ?? null, online:j.approximate_presence_count ?? null};
+}
+async function loadDiscord(){
+  const sources = [
+    async () => { const r = await fetch("/api/discord"); return r.ok ? r.json() : null; },
+    async () => { const r = await fetch("https://discord.com/api/v10/invites/2D4KTvA9Sh?with_counts=true"); return r.ok ? discordFrom(await r.json()) : null; }
+  ];
+  for (const src of sources){
+    try { const d = await src(); if (d && d.members != null) { C.discord = d; paintDiscord(); return; } } catch {}
+  }
+  C.discord = {members:null}; paintDiscord();
+}
+
+/* ---------- Pages ---------- */
+const P = {
+  home: () => `<div class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Roblox creator community</div>
+      <h1>Scripts, maps, and files,<br>forged for creators.</h1>
+      <p class="lead">Ask the AI assistant, share public files, sell your work, and find developers for your next build.</p>
+      <div class="row" style="margin-top:28px">
+        <a class="btn pri" href="#/chat">Open AI assistant</a>
+        <a class="btn" href="#/market">Browse marketplace</a>
+        <a class="btn" href="#/files">Public files</a>
+      </div>
+      <div class="card" style="margin-top:26px;flex-direction:row;align-items:center;gap:14px;max-width:600px">
+        <img id="dc-icon" alt="" width="44" height="44" style="border-radius:12px;display:none">
+        <div style="flex:1;min-width:0"><b id="dc-name">Elite Uncopylocked</b><div class="meta" id="dc-desc">Loading live stats…</div></div>
+        <a class="btn pri sm" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join Discord</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="dc-members">—</b><span>Discord members</span></div>
+        <div class="stat"><b id="dc-online">—</b><span>Online now</span></div>
+        <div class="stat"><b data-count="files">0</b><span>Public files</span></div>
+        <div class="stat"><b data-count="listings">0</b><span>Listings for sale</span></div>
+      </div>
+    </section>
+    <section class="sec"><div class="sec-h"><div><h2>Explore</h2><p class="lead" style="margin-top:6px">Everything in one place.</p></div></div>
+      <div class="grid">
+        ${[["chat","AI Assistant","Ask about scripting, the bot, VIP, and payments."],["files","Public Files","Upload and download free community files."],["market","Marketplace","Buy and sell scripts, decompiled and custom work."],["posts","Community","Post updates, ask questions, and share wins."],["services","Services","Commission custom scripts, maps, and UI."],["jobs","Jobs","Hire developers or find your next project."],["vip","VIP","Get your VIP ID and role."],["commands","Bot Commands","Every command the Elite Uncopylocked bot supports."]].map(([k,t,d])=>`<a class="card" href="#/${k}"><h3>${t}</h3><p class="mu">${d}</p></a>`).join("")}
+      </div></section>
+    <section class="sec"><h2>Bot features</h2><p class="lead" style="margin-bottom:16px">The Elite Uncopylocked Discord bot includes:</p>
+      <div class="row">${BOT.features.map(f=>`<span class="pill">${esc(f)}</span>`).join("")}</div></section>
+  </div>`,
+
+  chat: () => `<div class="wrap">
+    <div class="eyebrow">AI assistant</div><h1 style="font-size:34px">Ask anything about scripting or the community</h1>
+    <p class="lead" style="margin-bottom:22px">Knows Elite Uncopylocked, the bot's commands, and Luau scripting.</p>
+    <div class="chat">
+      <div class="log" id="log"><div class="msg bot">Hi! I can help with Luau scripts, game systems, the bot's commands, VIP, and payment questions. What are you building?</div></div>
+      <form class="composer" id="chatF"><textarea id="ci" rows="1" placeholder="Message the assistant…" style="flex:1"></textarea><button class="btn pri" type="submit" id="send">Send</button><button class="btn" type="button" id="stop" hidden>Stop</button></form>
+    </div>
+    <div class="chips"><button data-q="How do I open a payment ticket?">Payment help</button><button data-q="What commands does the bot have?">Bot commands</button><button data-q="How do I get VIP?">VIP</button><button data-q="Write a Luau script that makes a part bounce when touched.">Luau example</button></div>
+  </div>`,
+
+  files: () => `<div class="wrap"><div class="sec-h"><div><div class="eyebrow">Public files</div><h1 style="font-size:34px">Share and download files</h1><p class="lead">Upload free files for the community. Members with Contributor access can upload.</p></div></div>
+    <div class="two">
+      <div class="card"><h3>Upload a file</h3>
+        <form id="fileF"><label>Title</label><input name="title" required maxlength="80">
+        <label>Category</label><select name="cat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+        <label>Description</label><textarea name="desc" rows="3" maxlength="240"></textarea>
+        <label>File (up to 20 MB)</label><input type="file" name="file" required>
+        <div class="row" style="margin-top:16px"><button class="btn pri" type="submit">Upload</button></div></form>
+      </div>
+      <div class="card"><h3>What you can share</h3><p class="mu">Free scripts, models, maps, UI kits, and audio you have the rights to share. Files are visible to community members. Don't upload anything you don't have permission to distribute.</p></div>
+    </div>
+    <div class="sec"><h2 style="margin-bottom:16px">Latest files</h2><div class="grid" id="feed-files"></div></div></div>`,
+
+  posts: () => `<div class="wrap"><div class="eyebrow">Community</div><h1 style="font-size:34px">Posts</h1><p class="lead" style="margin-bottom:22px">Share progress, ask questions, and talk with other creators.</p>
+    <div class="two" style="grid-template-columns:1fr 1.4fr;align-items:start">
+      <div class="card"><h3>New post</h3><form id="postF"><textarea name="t" rows="5" maxlength="500" placeholder="What are you working on?" required></textarea>
+        <div class="row" style="margin-top:12px;justify-content:space-between"><span class="meta">Max 500 characters</span><button class="btn pri" type="submit">Post</button></div></form></div>
+      <div class="grid" id="feed-posts" style="grid-template-columns:1fr"></div>
+    </div></div>`,
+
+  market: () => `<div class="wrap"><div class="eyebrow">Marketplace</div><h1 style="font-size:34px">Buy and sell files</h1>
+    <p class="lead" style="margin-bottom:22px">Sell decompiled, uncopylocked, and custom work. Buyers pay and receive files through a Discord ticket, so staff and sellers can confirm the deal.</p>
+    <div class="two" style="grid-template-columns:1fr 1.4fr;align-items:start">
+      <div class="card"><h3>List a file for sale</h3><form id="listF">
+        <label>Title</label><input name="title" required maxlength="80">
+        <label>Category</label><select name="cat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+        <label>Price (USD)</label><input name="price" type="number" min="1" step="0.01" required>
+        <label>Description</label><textarea name="desc" rows="3" maxlength="300" required></textarea>
+        <p class="meta" style="margin-top:12px">Only list files you have the rights to sell. You deliver the file after the buyer's payment is confirmed in a ticket.</p>
+        <div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Publish listing</button></div></form></div>
+      <div class="grid" id="feed-market" style="grid-template-columns:1fr 1fr"></div>
+    </div></div>`,
+
+  services: () => `<div class="wrap"><div class="eyebrow">Services</div><h1 style="font-size:34px">Commissions</h1><p class="lead" style="margin-bottom:22px">Every quote is agreed directly before any payment. Open a support ticket to start.</p>
+    <div class="grid">${BOT.services.map(s=>`<div class="card"><h3>${esc(s.t)}</h3><p class="mu">${esc(s.d)}</p><div class="foot"><span class="tag">Quote on request</span><a class="btn sm" href="#/support">Request</a></div></div>`).join("")}</div></div>`,
+
+  jobs: () => `<div class="wrap"><div class="eyebrow">Jobs</div><h1 style="font-size:34px">Hire developers or find work</h1><p class="lead" style="margin-bottom:22px">Budgets and payment terms are agreed directly between the people involved. Confirm identities and agree on deliverables first.</p>
+    <div class="two" style="grid-template-columns:1fr 1.4fr;align-items:start">
+      <div class="card"><h3>Post a job</h3><form id="jobF">
+        <label>Title</label><input name="title" required maxlength="80">
+        <label>Skill</label><select name="skill"><option>Scripting</option><option>Building</option><option>UI</option><option>VFX</option><option>Other</option></select>
+        <label>Budget (optional, in USD)</label><input name="budget" maxlength="40" placeholder="e.g. $150–$300">
+        <label>Description</label><textarea name="desc" rows="3" maxlength="300" required></textarea>
+        <div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Post job</button></div></form></div>
+      <div class="grid" id="feed-jobs" style="grid-template-columns:1fr"></div>
+    </div></div>`,
+
+  vip: () => `<div class="wrap"><div class="eyebrow">VIP</div><h1 style="font-size:34px">VIP access</h1><p class="lead" style="margin-bottom:22px">${esc(BOT.vip)}</p>
+    <div class="two"><div class="card"><h3>Your VIP ID</h3><p class="mu">Your VIP ID is issued by the Elite Uncopylocked bot. It looks like <b style="color:var(--gold)">VIP-1</b>, <b style="color:var(--gold)">VIP-2</b>, and so on. Ask staff in Discord to get one.</p></div>
+      <div class="card"><h3>Need help?</h3><p class="mu">Use the AI assistant or open a ticket for VIP questions.</p><div class="row"><a class="btn" href="#/chat">Ask AI</a><a class="btn" href="#/support">Open ticket</a></div></div></div></div>`,
+
+  commands: () => `<div class="wrap"><div class="eyebrow">Discord bot</div><h1 style="font-size:34px">Bot commands</h1><p class="lead" style="margin-bottom:22px">Every slash command the Elite Uncopylocked bot supports. Some require admin permissions.</p>
+    <div class="card" style="padding:8px 22px">${BOT.commands.map(([c,d])=>`<div class="cmd"><code>${esc(c)}</code><span class="mu">${esc(d)}</span></div>`).join("")}</div></div>`,
+
+  team: () => `<div class="wrap"><div class="eyebrow">Team</div><h1 style="font-size:34px">The people behind Elite Uncopylocked</h1>
+    <div class="grid" style="margin-top:24px">${BOT.team.map(m=>`<div class="card"><h3 style="font-size:20px">${esc(m.n)}</h3><span class="tag">${esc(m.r)}</span><p class="mu">${esc(m.h)}</p></div>`).join("")}</div></div>`,
+
+  safety: () => `<div class="wrap"><div class="eyebrow">Safety</div><h1 style="font-size:34px">Stay safe in every deal</h1>
+    <div class="two" style="margin-top:24px">
+      <div class="card"><h3>Guidelines</h3><ul style="margin:0;padding-left:18px;color:var(--mu);display:flex;flex-direction:column;gap:6px">${BOT.safety.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>
+      <div class="card"><h3>Report a scam</h3><form id="rsF"><label>Who was involved</label><input name="w" required placeholder="Discord username">
+        <label>What happened</label><textarea name="x" rows="4" required></textarea>
+        <div class="row" style="margin-top:14px"><button class="btn" type="submit">Submit report</button></div></form></div>
+    </div></div>`,
+
+  support: () => `<div class="wrap"><div class="eyebrow">Support</div><h1 style="font-size:34px">Get help</h1><p class="lead" style="margin-bottom:22px">For payments, open a ticket. Staff can confirm details in the ticket channel.</p>
+    <div class="two"><div class="card"><h3>Send a message</h3><form id="tkF"><label>Subject</label><input name="s" required placeholder="Payment, upload, VIP, or other">
+      <label>Message</label><textarea name="m" rows="4" required></textarea><div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Send</button></div></form></div>
+      <div class="card"><h3>Ticket commands in Discord</h3><p class="mu"><code style="color:var(--gold)">/payment</code> payment support<br><code style="color:var(--gold)">/tickets</code> view open tickets<br><code style="color:var(--gold)">/closeticket</code> close a ticket<br><code style="color:var(--gold)">/ticketpanel</code> create the ticket panel (admins)</p></div></div></div>`
+};
+
+/* ---------- Router, nav, palette ---------- */
+$("#nav").innerHTML = ROUTES.slice(0,8).map(([k,l])=>`<a href="#/${k}" data-r="${k}">${l}</a>`).join("");
+function route(){
+  const p = (location.hash.slice(2) || "home").split("?")[0];
+  ($("#app")).innerHTML = (P[p] || P.home)();
+  document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("on", a.dataset.r === p));
+  window.scrollTo(0,0);
+  renderLive();
+}
+window.addEventListener("hashchange", route);
+function togglePal(on){
+  $("#pal").hidden = !on;
+  if (on){ $("#pq").value = ""; $("#pq").focus(); palList(""); }
+}
+function palList(q){
+  const m = ROUTES.filter(([k,l]) => l.toLowerCase().includes(q.toLowerCase()));
+  $("#pl").innerHTML = m.map(([k,l],i)=>`<a href="#/${k}" class="${i===0?"sel":""}" data-go="1">${l}</a>`).join("") || `<a>No pages match</a>`;
+}
+$("#kbd").onclick = () => togglePal(true);
+$("#pq").addEventListener("input", e => palList(e.target.value));
+$("#pal").addEventListener("click", e => { if (e.target.id === "pal" || e.target.dataset.go) togglePal(false); });
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); togglePal($("#pal").hidden); }
+  if (e.key === "Escape") togglePal(false);
+  if (e.key === "Enter" && !$("#pal").hidden) { const f = $("#pl a.sel"); if (f) { location.hash = f.getAttribute("href"); togglePal(false); } }
+});
+
+/* ---------- Clicks ---------- */
+document.addEventListener("click", async e => {
+  const q = e.target.closest("[data-q]");
+  if (q) { $("#ci").value = q.dataset.q; $("#chatF").requestSubmit(); return; }
+  const del = e.target.closest("[data-del]");
+  if (del) { const [col,id] = del.dataset.del.split("|"); if (C.db) await C.db.collection(col).doc(id).delete(); else { localStorage.setItem("eu_"+col, JSON.stringify(localList(col).filter(x => x.id !== id))); C[col] = localList(col); renderLive(); } return; }
+  const dl = e.target.closest("[data-dl]");
+  if (dl) {
+    const [id,fn] = dl.dataset.dl.split("|");
+    if (!C.dl) return toast("Downloads need access to this page. Sign in to continue.");
+    try { const blob = await (await fetch("/_blob/" + id)).blob(); await C.dl.save({filename: fn, data: blob}); }
+    catch { toast("Download unavailable right now."); }
+    return;
+  }
+  if (e.target.closest("[data-buy]")) return toast("To buy, open a ticket with /payment in Discord or DM @magmafox63911.");
+  if (e.target.closest("[data-apply]")) return toast("To apply, open a ticket in Discord and mention the job.");
+});
+
+/* ---------- Forms ---------- */
+const needDB = () => { if (!C.me) { toast("Sign in to Claude to post."); return false; } return true; };
+document.addEventListener("submit", async e => {
+  const f = e.target;
+  if (f.id === "chatF") return;
+  e.preventDefault();
+  const v = Object.fromEntries(new FormData(f));
+  const btn = f.querySelector("[type=submit]"); if (btn) btn.disabled = true;
+  try {
+    if (f.id === "postF") { if (!needDB()) return; await addDoc("posts",{text:v.t.trim(), uid:C.me, at:Date.now()}); f.reset(); toast("Posted."); }
+    else if (f.id === "listF") { if (!needDB()) return; await addDoc("listings",{title:v.title, cat:v.cat, price:Number(v.price), desc:v.desc, uid:C.me, at:Date.now()}); f.reset(); toast("Listing published."); }
+    else if (f.id === "jobF") { if (!needDB()) return; await addDoc("jobs",{title:v.title, skill:v.skill, budget:v.budget, desc:v.desc, uid:C.me, at:Date.now()}); f.reset(); toast("Job posted."); }
+    else if (f.id === "fileF") {
+      if (!C.assets) return toast("Uploads need Contributor access to this page.");
+      if (!needDB()) return;
+      const file = f.file.files[0]; if (!file) return toast("Choose a file first.");
+      const up = await C.assets.upload(file);
+      await addDoc("files",{title:v.title, cat:v.cat, desc:v.desc, fileId:up.id, fileName:file.name, size:file.size, uid:C.me, at:Date.now()});
+      f.reset(); toast("File uploaded.");
+    }
+    else if (f.id === "rsF") { toast("Report received. Thank you."); f.reset(); }
+    else if (f.id === "tkF") { toast("Ticket sent. Staff will reply in your ticket."); f.reset(); }
+  } catch (err) {
+    toast(err && err.code === "too_large" ? "That file is too large (max 20 MB)." : err && err.code === "unsupported_type" ? "That file type isn't supported." : "Something went wrong. Please try again.");
+  } finally { if (btn) btn.disabled = false; }
+});
+
+/* ---------- AI chat ---------- */
+let turns = [], ctl = null;
+function addMsg(role, text){ const log = $("#log"); const d = document.createElement("div"); d.className = "msg " + role; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "chatF") return;
+  e.preventDefault();
+  const text = $("#ci").value.trim(); if (!text) return;
+  $("#ci").value = "";
+  addMsg("me", text);
+  turns.push({role:"user", content:text});
+  const bubble = addMsg("bot", "Thinking…");
+  $("#send").hidden = true; $("#stop").hidden = false;
+  ctl = new AbortController();
+  const sent = turns.slice(-16); while (sent.length && sent[0].role !== "user") sent.shift();
+  try {
+    const r = await askAI(sent, ctl.signal, ({text})=>{ bubble.textContent = text; });
+    bubble.textContent = r.text; turns.push({role:"assistant", content:r.text});
+  } catch (err) {
+    const msg = err.code === "rate_limited" ? "Too many requests right now. Try again in a moment."
+      : err.code === "cancelled" ? "Stopped."
+      : err.code === "not_granted" ? "The assistant isn't connected yet."
+      : "I couldn't finish that reply. Please try again.";
+    bubble.textContent = err.text || msg;
+    if (err.text) turns.push({role:"assistant", content:err.text});
+  } finally { $("#send").hidden = false; $("#stop").hidden = true; ctl = null; }
+});
+document.addEventListener("click", e => { if (e.target.id === "stop" && ctl) ctl.abort(); });
+
+/* ---------- AI: OpenRouter via /api/chat, Claude sample as fallback inside Claude ---------- */
+async function askAI(sent, signal, onText){
+  let res = null;
+  try { res = await fetch("/api/chat", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({messages:sent}), signal}); }
+  catch (err) { if (err.name === "AbortError") throw {code:"cancelled", message:"stopped"}; }
+  const isApi = res && res.headers.get("content-type") && res.headers.get("content-type").includes("application/json");
+  if (res && res.ok && isApi) {
+    const j = await res.json().catch(() => ({}));
+    if (j.text) { onText({text:j.text, delta:j.text}); return {text:j.text}; }
+  }
+  if (isApi) throw {code:"upstream_error", message:"Assistant unavailable right now."};
+  if (!C.sample) throw {code:"not_granted", message:"assistant not connected"};
+  return C.sample([{role:"user", content:RULES}, ...sent], {cache:false, signal, onText});
+}
+
+/* ---------- Local storage for community data when no Claude database ---------- */
+function localList(col){ try { return JSON.parse(localStorage.getItem("eu_"+col) || "[]"); } catch { return []; } }
+function guestId(){ let g = localStorage.getItem("eu_guest"); if (!g) { g = "g_" + Math.random().toString(36).slice(2); localStorage.setItem("eu_guest", g); } return g; }
+function addDoc(col, data){
+  if (C.db) return C.db.collection(col).add(data);
+  const arr = localList(col); arr.unshift({id:Math.random().toString(36).slice(2), ...data});
+  localStorage.setItem("eu_"+col, JSON.stringify(arr.slice(0,200))); C[col] = arr.slice(0,200); renderLive();
+  return Promise.resolve();
+}
+
+/* ---------- Rising forge embers ---------- */
+const cv = $("#embers"), cx = cv.getContext("2d");
+let W, H, pts = [];
+const spark = init => ({x:Math.random()*W, y: init ? Math.random()*H : H+10, r:Math.random()*2+.5, v:Math.random()*.8+.3, s:Math.random()*6.28, c: Math.random()<.5 ? "255,140,40" : "255,210,120"});
+function size(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+size(); addEventListener("resize", size);
+for (let i = 0; i < 70; i++) pts.push(spark(true));
+(function frame(){
+  cx.clearRect(0,0,W,H);
+  for (const p of pts){
+    p.y -= p.v; p.s += .02; p.x += Math.sin(p.s) * .3;
+    if (p.y < -10) Object.assign(p, spark(false));
+    cx.beginPath(); cx.fillStyle = `rgba(${p.c},${.4 + Math.random()*.4})`;
+    cx.arc(p.x, p.y, p.r, 0, 6.283); cx.fill();
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- Boot ---------- */
+async function boot(){
+  [C.db, C.sample, C.assets, C.dl, C.user] = await Promise.all(["db","sample","assets","downloads","user"].map(use));
+  if (C.user) C.me = await C.user.id().catch(() => null);
+  const signed = !!C.me; if (!C.me) C.me = guestId();
+  $("#st").textContent = signed ? "Signed in" : "Guest";
+  $("#st").classList.toggle("on", signed);
+  if (!C.db) { ["posts","files","listings","jobs"].forEach(k => C[k] = localList(k)); }
+  renderLive();
+  if (C.db) {
+    sub("posts", v => C.posts = v);
+    sub("files", v => C.files = v);
+    sub("listings", v => C.listings = v);
+    sub("jobs", v => C.jobs = v);
+  }
+  renderLive();
+}
+route();
+boot();
+loadDiscord();
+setInterval(loadDiscord, 300000);
+</script>
+</body>
+</html>
