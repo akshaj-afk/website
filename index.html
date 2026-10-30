@@ -122,7 +122,7 @@ For any problems, please DM @magmafox63911</div>
 <div id="bm-result" style="margin-top:12px"></div></div></div>
 <div id="joinM" hidden><div class="card" style="width:min(460px,100%);text-align:center"><div class="eyebrow">Join the server</div>
 <h3 id="jm-title">Join the Discord to continue</h3><p class="mu" id="jm-text" style="margin:10px 0 18px"></p>
-<div class="row" style="justify-content:center"><a class="btn pri" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join Discord</a><a class="btn" id="jm-login" href="/api/auth/discord/login">Sign in with Discord</a></div>
+<div class="row" style="justify-content:center"><a class="btn pri" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join Discord</a><a class="btn" id="jm-login" href="/api/auth?route=discord/login">Sign in with Discord</a></div>
 <p style="margin-top:14px"><button class="link" id="jm-x" type="button">Maybe later</button></p></div></div>
 <div id="pal" hidden><div class="pbox"><input id="pq" placeholder="Jump to a page…"><div id="pl"></div></div></div>
 
@@ -274,7 +274,7 @@ const P = {
       </div></section>
     <section class="sec"><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:28px">
       <div><div class="eyebrow">Join the community</div><h2>Get more out of Elite Uncopylocked</h2><p class="lead" style="margin-top:8px">Members can buy and sell files, post file requests, open support tickets, climb the ranks, and join giveaways.</p></div>
-      <div class="row"><a class="btn pri" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join the Discord</a><a class="btn" href="/api/auth/discord/login">Sign in with Discord</a></div></div>
+      <div class="row"><a class="btn pri" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join the Discord</a><a class="btn" href="/api/auth?route=discord/login">Sign in with Discord</a></div></div>
     <div class="grid" style="margin-top:16px">
       <div class="card"><h3>Buy and sell</h3><p class="mu">Browse decompiled, uncopylocked, and custom files, or list your own.</p></div>
       <div class="card"><h3>Request files</h3><p class="mu">Post what you need and let sellers and the community reply.</p></div>
@@ -627,8 +627,8 @@ function paintAuth(){
   const el = $("#auth"); if (!el) return;
   const a = C.acct;
   el.innerHTML = a
-    ? `<span class="pill ${a.member ? "on" : ""}" style="display:inline-flex;align-items:center;gap:6px"><img src="${esc(a.avatar)}" alt="" width="18" height="18" style="border-radius:50%">${esc(a.name)}${a.member ? " · member" : ""}</span><a class="btn sm" href="/api/auth/logout">Sign out</a>`
-    : `<a class="btn sm" href="/api/auth/discord/login">Sign in with Discord</a><a class="btn sm" href="/api/auth/google/login">Google</a>`;
+    ? `<span class="pill ${a.member ? "on" : ""}" style="display:inline-flex;align-items:center;gap:6px"><img src="${esc(a.avatar)}" alt="" width="18" height="18" style="border-radius:50%">${esc(a.name)}${a.member ? " · member" : ""}</span><a class="btn sm" href="/api/auth?route=logout">Sign out</a>`
+    : `<a class="btn sm" href="/api/auth?route=discord/login">Sign in with Discord</a><a class="btn sm" href="/api/auth?route=google/login">Google</a>`;
 }
 function showJoin(text){
   $("#jm-text").textContent = text;
