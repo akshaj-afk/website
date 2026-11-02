@@ -3,7 +3,7 @@
 // /api/auth/<route> callback URLs to this same function.
 // Routes: discord/login, discord/callback, google/login, google/callback, logout
 import { randomBytes } from "node:crypto";
-import { baseUrl, setCookie, cookie, sign, isMember, redirect } from "../lib/auth.js";
+import { baseUrl, setCookie, cookie, sign, userGuildMember, VIP_ROLE_ID, redirect } from "../lib/auth.js";
 
 function discordLogin(req, res) {
   const state = randomBytes(16).toString("hex");
@@ -12,7 +12,7 @@ function discordLogin(req, res) {
     client_id: process.env.DISCORD_CLIENT_ID || "",
     redirect_uri: `${baseUrl(req)}/api/auth/discord/callback`,
     response_type: "code",
-    scope: "identify guilds",
+    scope: "identify guilds guilds.members.read",
     state,
   });
   return redirect(res, "https://discord.com/oauth2/authorize?" + q);
@@ -38,12 +38,14 @@ async function discordCallback(req, res) {
     if (!tok.ok) throw new Error("token exchange failed");
     const { access_token } = await tok.json();
     const me = await (await fetch("https://discord.com/api/v10/users/@me", { headers: { Authorization: `Bearer ${access_token}` } })).json();
-    const member = await isMember(access_token);
+    const gm = await userGuildMember(access_token);
+    const member = !!(gm && gm.member);
+    const vip = !!(gm && gm.member && VIP_ROLE_ID && gm.roles.includes(VIP_ROLE_ID));
     const avatar = me.avatar
       ? `https://cdn.discordapp.com/avatars/${me.id}/${me.avatar}.png?size=64`
       : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(me.id) >> 22n) % 6n)}.png`;
     setCookie(res, "eu_session", sign({
-      p: "discord", id: me.id, name: me.global_name || me.username, avatar, member,
+      p: "discord", id: me.id, name: me.global_name || me.username, username: me.username, avatar, member, vip,
       exp: Date.now() + 7 * 86400000,
     }), 7 * 86400);
     setCookie(res, "eu_state", "", 0);
