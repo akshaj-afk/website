@@ -3,7 +3,7 @@
 // /api/auth/<route> callback URLs to this same function.
 // Routes: discord/login, discord/callback, google/login, google/callback, logout
 import { randomBytes } from "node:crypto";
-import { baseUrl, setCookie, cookie, sign, userGuildMember, VIP_ROLE_ID, redirect } from "../lib/auth.js";
+import { baseUrl, setCookie, cookie, sign, userGuildMember, VIP_ROLE_ID, redirect, getUser, membership, isAdmin } from "../lib/auth.js";
 
 function discordLogin(req, res) {
   const state = randomBytes(16).toString("hex");
@@ -101,6 +101,14 @@ async function googleCallback(req, res) {
   }
 }
 
+async function meHandler(req, res) {
+  res.setHeader("Cache-Control", "no-store");
+  const u = getUser(req);
+  if (!u) return res.status(200).json({ user: null });
+  const ms = await membership(u);
+  return res.status(200).json({ user: { name: u.name, avatar: u.avatar, provider: u.p, member: ms.member, vip: ms.vip, admin: isAdmin(u) } });
+}
+
 export default async function handler(req, res) {
   const path = (req.query?.route || new URL(req.url, baseUrl(req)).searchParams.get("route") || "").replace(/\/$/, "");
   switch (path) {
@@ -108,6 +116,7 @@ export default async function handler(req, res) {
     case "discord/callback": return discordCallback(req, res);
     case "google/login": return googleLogin(req, res);
     case "google/callback": return googleCallback(req, res);
+    case "me": return meHandler(req, res);
     case "logout":
       setCookie(res, "eu_session", "", 0);
       return redirect(res, "/");
