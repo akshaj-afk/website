@@ -129,17 +129,9 @@ For any problems, please DM @magmafox63911</div>
 <script>
 /* ---------- Data from the Elite Uncopylocked bot ---------- */
 const BOT = {
-  commands: [
-    ["/setup","Setup bot configuration"],["/welcomesetup","Setup welcome message for new members"],["/boostrolesetup","Setup boost role"],
-    ["/ticketpanel","Create a ticket creation panel"],["/ticketsetup","Setup ticket system"],["/aichatsetup","Set the channel where AI chats freely (no mention needed)"],
-    ["/aichatoff","Disable or re-enable AI chat"],["/balance","Check your balance"],["/chatstats","View your chat statistics and earnings"],
-    ["/daily","Claim daily reward"],["/pay","Send money to another user"],["/payment","Payment support and help"],
-    ["/tickets","View all open tickets"],["/closeticket","Close a ticket"],["/rank","Check your rank and XP"],["/leaderboard","View top users"],
-    ["/addword","Add a word to the ban list"],["/removeword","Remove a word from the ban list"],["/listwords","List all banned words"],
-    ["/modtoggle","Toggle moderation"],["/manexinfo","Information overview (sent privately)"],["/dbstatus","Check database status"]
-  ],
-  features: ["Economy","Leveling and ranks","Ticket system with payment tickets","Moderation and word filter","Giveaways","Backup","Reaction roles","Boost rewards","Welcome messages","AI chat assistant"],
-  vip: "VIP members get a unique VIP ID issued by the bot (VIP-1, VIP-2, and so on) and the VIP role in the Discord server.",
+  commands: [["/setup", "Setup bot configuration"], ["/welcomesetup", "Setup welcome message for new members"], ["/boostrolesetup", "Setup boost role"], ["/ticketpanel", "Create a ticket creation panel"], ["/ticketsetup", "Setup ticket system"], ["/aichatsetup", "Set the channel where the AI chats freely (no mention needed)"], ["/aichatoff", "Disable or re-enable AI chat"], ["/balance", "Check your balance"], ["/chatstats", "View your chat statistics"], ["/daily", "Claim daily reward"], ["/pay", "Send money to another user"], ["/payment", "Payment support and help"], ["/tickets", "View all open tickets"], ["/closeticket", "Close a ticket"], ["/rank", "Check your rank and XP"], ["/leaderboard", "View top users"], ["/addword", "Add word to ban list"], ["/removeword", "Remove word from ban list"], ["/listwords", "List all banned words"], ["/modtoggle", "Toggle moderation"], ["/manexinfo", "Get information about MANEX Inc."], ["/dbstatus", "Check database status"], ["/buyvip", "Buy VIP for 500 Robux"], ["/vip_grant", "Grant VIP after payment (staff)"]],
+  features: ["Economy and daily rewards","Ranks and leaderboard","Ticket system and payment support","Moderation and word filter","VIP membership (500 Robux)","Welcome messages","Boost roles","AI chat assistant"],
+  vip: "VIP costs 500 Robux. Use /buyvip in the Discord server to get your VIP ID, then open a ticket with /payment to pay. Staff grant the VIP role after payment is confirmed.",
   team: [
     {n:"Legend",h:"@legend_demon_404",r:"Owner"},
     {n:"Magma",h:"@magmafox63911",r:"Chief & Bot Developer"}
@@ -165,14 +157,16 @@ const ROUTES = [["home","Home"],["chat","AI Chat"],["files","Public Files"],["po
 
 const RULES = `You are the assistant for Elite Uncopylocked, a Roblox creator community. Answer clearly and concisely. Format answers with Markdown: **bold** for key terms, short bullet or numbered lists for steps, and fenced code blocks for code. You help with Luau and Roblox scripting, game systems, UI, building, and using this community's site and bot.
 Facts you may state: Owner is Legend (@legend_demon_404). Chief and Bot Developer is Magma (@magmafox63911). Questions go to @magmafox63911.
-Bot slash commands (the only commands that exist): /setup, /welcomesetup, /boostrolesetup, /ticketpanel, /ticketsetup, /aichatsetup, /aichatoff, /balance, /chatstats, /daily, /pay, /payment, /tickets, /closeticket, /rank, /leaderboard, /addword, /removeword, /listwords, /modtoggle, /manexinfo, /dbstatus. Never invent other commands.
-Bot features: economy, leveling and ranks, ticket and payment tickets, moderation, giveaways, backup, reaction roles, boost rewards, welcome messages.
-VIP: members get a VIP ID such as VIP-1 and the VIP role in Discord. Do not invent prices or VIP perks beyond this.
+Bot slash commands (the only commands that exist): /setup, /welcomesetup, /boostrolesetup, /ticketpanel, /ticketsetup, /aichatsetup, /aichatoff, /balance, /chatstats, /daily, /pay, /payment, /tickets, /closeticket, /rank, /leaderboard, /addword, /removeword, /listwords, /modtoggle, /manexinfo, /dbstatus, /buyvip, /vip_grant. Never invent other commands.
+Bot features: economy and daily rewards, ranks and leaderboard, tickets and payment support, moderation and word filter, VIP purchase, welcome messages, boost roles.
+VIP costs 500 Robux. Members buy with /buyvip, pay in a /payment ticket, and staff grant the VIP role with /vip_grant. VIP IDs look like VIP-1001. Do not invent other VIP perks.
 Payments: for payment problems send users to /payment. Never claim a payment was verified or a role was granted. Staff do not hold funds or guarantee deals. Warn users to verify identities, agree on deliverables first, and never share passwords, tokens, or recovery codes.
 Only help with scripts and files the user has the rights to use. Do not help break protections on someone else's paid or private content, and say so briefly when it applies.
 If you are not sure about something specific to this community, say so and point to @magmafox63911.`;
 
 /* ---------- Runtime state ---------- */
+// VIP payment links. Put your real links here.
+const VIP_LINKS = {paypal: "", gamepass: ""};
 const C = {acct:null,requests:[],discord:null,db:null,sample:null,assets:null,dl:null,user:null,me:null,posts:[],files:[],listings:[],jobs:[],names:{}};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -345,10 +339,26 @@ const P = {
       <div class="grid" id="feed-jobs" style="grid-template-columns:1fr"></div>
     </div></div>`,
 
-  vip: () => `<div class="wrap"><div class="eyebrow">VIP</div><h1 style="font-size:34px">VIP access</h1><p class="lead" style="margin-bottom:22px">${esc(BOT.vip)}</p>
-    <div class="two"><div class="card"><h3>Your VIP ID</h3><p class="mu">Your VIP ID is issued by the Elite Uncopylocked bot. It looks like <b style="color:var(--gold)">VIP-1</b>, <b style="color:var(--gold)">VIP-2</b>, and so on. Ask staff in Discord to get one.</p></div>
-      <div class="card"><h3>Need help?</h3><p class="mu">Use the AI assistant or open a ticket for VIP questions.</p><div class="row"><a class="btn" href="#/chat">Ask AI</a><a class="btn" href="#/support">Open ticket</a></div></div></div></div>`,
-
+  vip: () => `<div class="wrap"><div class="eyebrow">VIP</div><h1 style="font-size:34px">VIP access</h1>
+    <p class="lead" style="margin-bottom:22px">VIP costs <b style="color:var(--gold)">500 Robux</b>. Pay with PayPal or the Roblox gamepass, then send your proof here. Staff check it and give you the VIP role in Discord.</p>
+    <div class="two" style="align-items:start">
+      <div class="card" id="vip-pay"><h3>1. Pay</h3><p class="mu">Pay with either option. You need to be signed in with Discord and in the server.</p>
+        <div class="row" style="margin-top:14px">
+          ${VIP_LINKS.paypal ? `<a class="btn pri" href="${esc(VIP_LINKS.paypal)}" target="_blank" rel="noopener">Pay with PayPal</a>` : ""}
+          ${VIP_LINKS.gamepass ? `<a class="btn" href="${esc(VIP_LINKS.gamepass)}" target="_blank" rel="noopener">Roblox Gamepass</a>` : ""}
+        </div>
+        <p class="meta" style="margin-top:14px">Your Discord account is the one that gets the role, so sign in with the same account you're using in the server.</p></div>
+      <div class="card" id="vip-proof"><h3>2. Send your proof</h3>
+        <form id="vipF"><label>How you paid</label>
+          <select name="method"><option value="paypal">PayPal</option><option value="gamepass">Roblox Gamepass</option></select>
+          <label>Transaction ID or receipt link</label>
+          <input name="proof" required maxlength="300" placeholder="PayPal transaction ID, or a link to your screenshot">
+          <div class="row" style="margin-top:14px"><button class="btn pri" type="submit">Send proof</button></div>
+        </form>
+      </div>
+    </div>
+    <p id="vip-status" class="mu" style="margin-top:18px"></p>
+    <div id="vip-admin" style="margin-top:28px"></div></div>`,
   commands: () => `<div class="wrap"><div class="eyebrow">Discord bot</div><h1 style="font-size:34px">Bot commands</h1><p class="lead" style="margin-bottom:22px">Every slash command the Elite Uncopylocked bot supports. Some require admin permissions.</p>
     <div class="card" style="padding:8px 22px">${BOT.commands.map(([c,d])=>`<div class="cmd"><code>${esc(c)}</code><span class="mu">${esc(d)}</span></div>`).join("")}</div></div>`,
 
@@ -390,7 +400,7 @@ function route(){
   window.scrollTo(0,0);
   renderLive();
 }
-window.addEventListener("hashchange", route);
+window.addEventListener("hashchange", () => { route(); if (location.hash === "#/vip") refreshVip(); });
 function togglePal(on){
   $("#pal").hidden = !on;
   if (on){ $("#pq").value = ""; $("#pq").focus(); palList(""); }
@@ -423,6 +433,7 @@ document.addEventListener("click", async e => {
     return;
   }
   const buy = e.target.closest("[data-buy]"); if (buy) return openBuy(buy.dataset.buy);
+  const va = e.target.closest("[data-vip-action]"); if (va) return vipAction(va.dataset.vipId, va.dataset.vipAction);
   if (e.target.closest("#bm-x") || e.target.id === "buyM") { $("#buyM").hidden = true; return; }
   if (e.target.closest("#jm-x") || e.target.id === "joinM") { $("#joinM").hidden = true; return; }
   if (e.target.closest("#ob")) return checkOrder();
@@ -442,6 +453,7 @@ document.addEventListener("submit", async e => {
     if (f.id === "postF") { if (!gate("post in the community")) return; await postJSON("/api/posts", {text:v.t}); f.reset(); toast("Posted."); await loadCommunity(); }
     else if (f.id === "listF") { if (!gate("sell files")) return; await postJSON("/api/listings", {title:v.title, cat:v.cat, price:v.price, description:v.desc, seller:v.seller, fileUrl:v.fileUrl}); f.reset(); toast("Listing published."); await loadMarket(); }
     else if (f.id === "reqF") { if (!gate("request files")) return; await postJSON("/api/requests", v); f.reset(); toast("Request posted."); await loadMarket(); }
+    else if (f.id === "vipF") { if (!gate("buy VIP")) return; await postJSON("/api/vip", {method:v.method, proof:v.proof}); f.reset(); toast("Proof sent. Staff will check it and give you VIP."); await loadVipStatus(); }
     else if (f.id === "buyF") { await placeOrder(v); }
     else if (f.id === "jobF") { if (!gate("post a job")) return; await postJSON("/api/jobs", v); f.reset(); toast("Job posted."); await loadCommunity(); }
     else if (f.id === "fileF") {
@@ -618,8 +630,9 @@ async function checkOrder(){
 async function loadMe(){
   try { const j = await fetch("/api/me").then(r => r.json()); C.acct = j.user || null; } catch { C.acct = null; }
   paintAuth();
+  refreshVip();
   const flag = new URLSearchParams(location.search).get("auth");
-  if (flag === "failed") toast("Sign-in didn't finish. Please try again.");
+  if (flag === "failed") toast("Sign-in failed: " + (new URLSearchParams(location.search).get("why") || "please try again"));
   if (flag === "ok") toast(C.acct && C.acct.member ? "Welcome! You're verified as a server member." : "Signed in. Join the Discord server to buy, sell and request files.");
   if (flag) history.replaceState(null, "", location.pathname + location.hash);
 }
@@ -627,7 +640,7 @@ function paintAuth(){
   const el = $("#auth"); if (!el) return;
   const a = C.acct;
   el.innerHTML = a
-    ? `<span class="pill ${a.member ? "on" : ""}" style="display:inline-flex;align-items:center;gap:6px"><img src="${esc(a.avatar)}" alt="" width="18" height="18" style="border-radius:50%">${esc(a.name)}${a.member ? " · member" : ""}</span><a class="btn sm" href="/api/auth?route=logout">Sign out</a>`
+    ? `<span class="pill ${a.member ? "on" : ""}" style="display:inline-flex;align-items:center;gap:6px"><img src="${esc(a.avatar)}" alt="" width="18" height="18" style="border-radius:50%">${esc(a.name)}${a.member ? " · member" : ""}${a.vip ? " · VIP" : ""}</span><a class="btn sm" href="/api/auth?route=logout">Sign out</a>`
     : `<a class="btn sm" href="/api/auth?route=discord/login">Sign in with Discord</a><a class="btn sm" href="/api/auth?route=google/login">Google</a>`;
 }
 function showJoin(text){
@@ -661,6 +674,48 @@ async function submitProof(){
   if (!proof) return toast("Paste a link or transaction ID first.");
   try { await postJSON("/api/proof", {code:C.code, proof}); toast("Proof sent. Staff will review it and deliver your file."); $("#pf").value = ""; }
   catch (err) { toast(err.message); }
+}
+
+/* ---------- VIP status and admin approvals ---------- */
+async function loadVipStatus(){
+  const el = $("#vip-status"); if (!el) return;
+  const hideProof = (hide) => { const c = $("#vip-proof"), p = $("#vip-pay"); if (c) c.style.display = hide ? "none" : ""; if (p) p.style.display = hide ? "none" : ""; };
+  if (C.acct && C.acct.vip) { el.textContent = "You have VIP in the Discord server."; hideProof(true); return; }
+  hideProof(false);
+  if (!C.acct) { el.textContent = "Sign in with Discord to buy VIP."; return; }
+  try {
+    const r = await fetch("/api/vip"); const j = await r.json();
+    if (!r.ok || !j.order) { el.textContent = ""; return; }
+    const labels = {pending:"waiting for staff to check your payment", approved:"approved, your VIP role is on its way", rejected:"not approved. Send new proof or ask in Discord"};
+    el.textContent = `Latest order #${j.order.id}: ${labels[j.order.status] || j.order.status}`;
+  } catch { el.textContent = ""; }
+}
+async function loadAdmin(){
+  const box = $("#vip-admin"); if (!box) return;
+  box.textContent = "";
+  if (!C.acct || !C.acct.admin) return;
+  const title = document.createElement("h3"); title.textContent = "Pending VIP orders"; box.append(title);
+  try {
+    const j = await fetch("/api/vip-admin").then(r => r.json());
+    if (!j.orders || !j.orders.length) { const p = document.createElement("p"); p.className = "mu"; p.textContent = "No pending orders."; box.append(p); return; }
+    for (const o of j.orders) {
+      const card = document.createElement("div"); card.className = "card"; card.style.margin = "10px 0";
+      const t = document.createElement("p"); t.textContent = `#${o.id} · ${o.discord_name} (${o.discord_id}) · ${o.method}`;
+      const pr = document.createElement("p"); pr.className = "mu"; pr.style.wordBreak = "break-all"; pr.textContent = "Proof: " + (o.proof || "none");
+      const row = document.createElement("div"); row.className = "row"; row.style.margin = "8px 0 0";
+      const ok = document.createElement("button"); ok.className = "btn pri sm"; ok.type = "button"; ok.textContent = "Approve"; ok.dataset.vipId = o.id; ok.dataset.vipAction = "approve";
+      const no = document.createElement("button"); no.className = "btn sm"; no.type = "button"; no.textContent = "Reject"; no.dataset.vipId = o.id; no.dataset.vipAction = "reject";
+      row.append(ok, no); card.append(t, pr, row); box.append(card);
+    }
+  } catch { const p = document.createElement("p"); p.className = "mu"; p.textContent = "Couldn't load orders."; box.append(p); }
+}
+function refreshVip(){ loadVipStatus(); loadAdmin(); }
+async function vipAction(id, action){
+  try {
+    const j = await postJSON("/api/vip-admin", {id:Number(id), action});
+    toast(j.note || (action === "approve" ? "Approved." : "Rejected."));
+    loadAdmin();
+  } catch (err) { toast(err.message || "Something went wrong."); }
 }
 
 /* ---------- Boot ---------- */
