@@ -1,5 +1,40 @@
 {
   "rewrites": [
-    { "source": "/api/auth/:route*", "destination": "/api/auth?route=:route*" }
+    {
+      "source": "/api/auth/:route*",
+      "destination": "/api/auth?route=:route*"
+    },
+    {
+      "source": "/api/me",
+      "destination": "/api/auth?route=me"
+    },
+    {
+      "source": "/api/posts",
+      "destination": "/api/community?kind=posts"
+    },
+    {
+      "source": "/api/jobs",
+      "destination": "/api/community?kind=jobs"
+    },
+    {
+      "source": "/api/requests",
+      "destination": "/api/community?kind=requests"
+    },
+    {
+      "source": "/api/listings",
+      "destination": "/api/community?kind=listings"
+    },
+    {
+      "source": "/api/orders",
+      "destination": "/api/shop?kind=orders"
+    },
+    {
+      "source": "/api/proof",
+      "destination": "/api/shop?kind=proof"
+    },
+    {
+      "source": "/api/vip-admin",
+      "destination": "/api/vip?admin=1"
+    }
   ]
 }
