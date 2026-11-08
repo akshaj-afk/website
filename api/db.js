@@ -52,6 +52,24 @@ export function ensureSchema() {
         poster TEXT NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
       await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS proof TEXT`;
+      await sql`CREATE TABLE IF NOT EXISTS public_files (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        cat TEXT NOT NULL,
+        description TEXT,
+        file_name TEXT NOT NULL,
+        size INTEGER NOT NULL,
+        url TEXT NOT NULL,
+        uploader TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+      await sql`CREATE TABLE IF NOT EXISTS vip_orders (
+        id SERIAL PRIMARY KEY,
+        discord_id TEXT NOT NULL,
+        discord_name TEXT NOT NULL,
+        method TEXT NOT NULL,
+        proof TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
     })().catch(err => { schemaReady = null; throw err; });
   }
   return schemaReady;
