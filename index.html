@@ -100,6 +100,82 @@ textarea{resize:vertical}
 #buyM[hidden],#joinM[hidden]{display:none}
 .foot-site{border-top:1px solid var(--line);margin-top:60px;padding:26px 24px;color:var(--mu);font-size:13px;text-align:center;white-space:pre-line}
 @media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.cmd{grid-template-columns:1fr}.nav{order:3;width:100%}h1{font-size:34px}.msg{max-width:92%}}
+/* ---- Magma theme ---- */
+body{background:radial-gradient(900px 480px at 50% 115%,rgba(255,90,25,.26),transparent 62%),radial-gradient(700px 420px at 8% -8%,rgba(255,150,50,.14),transparent 60%),radial-gradient(600px 380px at 96% 10%,rgba(200,40,10,.12),transparent 60%),#0b0605}
+h1{background:linear-gradient(95deg,#fff3dc 0%,#ffc25c 40%,#ff5a1f 80%,#ff3b00 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,90,30,.35))}
+.card{background:linear-gradient(170deg,rgba(255,120,40,.07),transparent 40%),linear-gradient(180deg,#1a100c,#0e0907);border-color:#3b2118}
+.card:hover{border-color:#ff6b2c;box-shadow:0 0 0 1px rgba(255,107,44,.25),0 18px 50px -18px rgba(255,80,20,.6)}
+.btn.pri{background:linear-gradient(180deg,#ff8a3d,#e8380d);box-shadow:0 0 0 1px rgba(255,140,60,.4),0 10px 30px -10px rgba(255,70,20,.9)}
+.btn.pri:hover{box-shadow:0 0 0 1px rgba(255,160,80,.6),0 14px 40px -8px rgba(255,80,20,1)}
+.tag{background:rgba(255,120,40,.1);border-color:rgba(255,140,60,.35);color:#ffc26b}
+.stat{background:linear-gradient(160deg,#1c110c,#0d0907);border-color:#3b2118}
+.stat b{background:linear-gradient(180deg,#fff3dc,#ff9a3c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.top{background:rgba(12,7,5,.82)}
+/* ---- Fly-in on scroll ---- */
+.fly{opacity:0;transform:translate(var(--fx,0px),var(--fy,26px)) scale(.97);transition:opacity .6s ease,transform .75s cubic-bezier(.2,.8,.2,1)}
+.fly.in{opacity:1;transform:none}
+.card.fly.in:hover{transform:translateY(-3px)}
+@media (prefers-reduced-motion:reduce){.fly{opacity:1;transform:none;transition:none}}
+.more{display:flex;justify-content:center;grid-column:1/-1;padding:6px 0}
+/* ---- Mobile menu (the ⋯ button) ---- */
+#more{display:none}
+#menu{position:absolute;right:5vw;top:62px;background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:8px;display:grid;gap:2px;min-width:200px;z-index:20;box-shadow:0 24px 60px -20px #000}
+#menu[hidden]{display:none}
+#menu a{padding:10px 12px;border-radius:8px;color:var(--mu)}
+#menu a:hover{color:var(--tx);background:var(--s2)}
+@media(max-width:860px){.nav{display:none!important}#more{display:inline-flex}}
+/* ---- MAGMA, pushed further ---- */
+@keyframes lavaflow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes lavaglow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,80,20,.45))}50%{filter:drop-shadow(0 0 26px rgba(255,140,40,.9))}}
+@keyframes crackpulse{0%,100%{opacity:.35}50%{opacity:.8}}
+@keyframes rise{0%{transform:translateY(0);opacity:.0}10%{opacity:.9}100%{transform:translateY(-120vh);opacity:0}}
+::selection{background:#ff5a1f;color:#120603}
+body{background:radial-gradient(1100px 520px at 50% 118%,rgba(255,70,15,.42),transparent 64%),radial-gradient(800px 460px at 6% -10%,rgba(255,130,40,.2),transparent 62%),radial-gradient(700px 420px at 100% 0%,rgba(190,30,8,.2),transparent 60%),linear-gradient(180deg,#0a0403,#150806 60%,#0b0403)}
+/* molten pool along the bottom of every page */
+body::before{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;pointer-events:none;z-index:0;
+  background:linear-gradient(90deg,#7a1500,#ff4a0c,#ffb13a,#ff4a0c,#7a1500);background-size:200% 100%;
+  animation:lavaflow 9s linear infinite;opacity:.55;
+  -webkit-mask:linear-gradient(to top,#000 40%,transparent);mask:linear-gradient(to top,#000 40%,transparent)}
+/* glowing lava line under the header */
+.top::after{height:3px;background:linear-gradient(90deg,transparent,#ff3b00,#ffc25c,#ff3b00,transparent);background-size:200% 100%;opacity:1;box-shadow:0 0 18px rgba(255,80,20,.9)}
+.brand{background:linear-gradient(95deg,#fff3dc,#ffc25c 35%,#ff5a1f 70%,#ffb13a);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lavaflow 5s linear infinite,lavaglow 3s ease-in-out infinite}
+h1,h2{background:linear-gradient(95deg,#fff3dc 0%,#ffc25c 25%,#ff5a1f 55%,#ffb13a 80%,#fff3dc 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lavaflow 8s linear infinite}
+h1{filter:drop-shadow(0 0 22px rgba(255,90,30,.5))}
+.eyebrow{text-shadow:0 0 12px rgba(255,90,30,.8);letter-spacing:.2em}
+.tag{box-shadow:0 0 12px rgba(255,90,30,.25) inset}
+/* obsidian cards with glowing cracks */
+.card,.stat{position:relative;overflow:hidden;background:radial-gradient(120% 90% at 0% 0%,rgba(255,110,30,.14),transparent 55%),linear-gradient(180deg,#1b0e09,#0c0604);border-color:#4a2316;box-shadow:inset 0 1px 0 rgba(255,170,90,.08),0 14px 40px -22px rgba(0,0,0,.9)}
+.card::before,.stat::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:linear-gradient(115deg,transparent 46%,rgba(255,110,30,.55) 48%,transparent 50%),linear-gradient(62deg,transparent 60%,rgba(255,170,60,.4) 62%,transparent 64%),linear-gradient(20deg,transparent 30%,rgba(255,90,20,.35) 32%,transparent 34%);
+  animation:crackpulse 6s ease-in-out infinite}
+.card>*,.stat>*{position:relative}
+.card:hover{border-color:#ff6b2c;box-shadow:0 0 0 1px rgba(255,107,44,.35),0 0 40px -6px rgba(255,80,20,.75),inset 0 0 30px rgba(255,80,20,.12)}
+.card:hover::before{opacity:1}
+.stat b{animation:lavaglow 4s ease-in-out infinite}
+/* molten buttons */
+.btn.pri{background:linear-gradient(90deg,#ff3b00,#ffb13a,#ff5a1f,#ff3b00);background-size:250% 100%;animation:lavaflow 4s linear infinite;border-color:#ffb13a;color:#fff7e8;text-shadow:0 1px 0 rgba(90,20,0,.5);box-shadow:0 0 0 1px rgba(255,190,90,.35),0 0 26px -4px rgba(255,80,20,.95),inset 0 1px 0 rgba(255,240,200,.5)}
+.btn.pri:hover{box-shadow:0 0 0 1px rgba(255,220,120,.6),0 0 46px -2px rgba(255,100,30,1),inset 0 1px 0 rgba(255,240,200,.7)}
+.btn.ghost{border-color:#5a2a18;color:#ffc26b}
+.btn.ghost:hover{border-color:#ff6b2c;box-shadow:0 0 18px -4px rgba(255,80,20,.8)}
+.btn:active{transform:translateY(1px) scale(.98)}
+input:focus,select:focus,textarea:focus{border-color:#ff6b2c;box-shadow:0 0 0 3px rgba(255,107,44,.25),0 0 18px rgba(255,80,20,.25)}
+.top{background:rgba(10,4,3,.86);border-bottom-color:#3b1d12}
+.nav a.on{color:#ffc26b;box-shadow:inset 0 -2px 0 #ff5a1f,0 6px 16px -10px rgba(255,80,20,1)}
+#menu{background:linear-gradient(180deg,#1b0e09,#0c0604);border-color:#4a2316}
+/* falling embers over the lava */
+.ember-rain{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.ember-rain i{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;background:#ffc25c;box-shadow:0 0 8px #ff7a1a;animation:rise linear infinite}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:#0a0403}::-webkit-scrollbar-thumb{background:linear-gradient(#ff7a1a,#7a1500);border-radius:6px}
+@media (prefers-reduced-motion:reduce){body::before,.brand,h1,h2,.btn.pri,.card::before,.stat b,.ember-rain i{animation:none!important}}
+/* plain primary buttons (no moving texture) */
+.btn.pri{background:linear-gradient(180deg,#ff8a3d,#e8380d);background-size:auto;animation:none;border-color:#ff8a3d;color:#fff;text-shadow:none;box-shadow:0 0 0 1px rgba(255,140,60,.35),0 8px 24px -10px rgba(255,70,20,.8)}
+.btn.pri:hover{box-shadow:0 0 0 1px rgba(255,160,80,.5),0 12px 30px -8px rgba(255,80,20,.95)}
+/* remove the element textures: solid colours and glows only */
+.card::before,.stat::before{display:none!important;animation:none!important}
+.stat b{animation:none!important}
+body::before{display:none!important}
+.top::after{background:#ff5a1f!important;background-size:auto!important;animation:none!important;box-shadow:0 0 14px rgba(255,80,20,.7)!important}
+.card,.stat{background:linear-gradient(180deg,#1b0e09,#0c0604)!important;box-shadow:inset 0 1px 0 rgba(255,170,90,.08),0 14px 40px -22px rgba(0,0,0,.9)!important}
 </style>
 </head>
 <body>
@@ -108,10 +184,12 @@ textarea{resize:vertical}
   <div class="bar">
     <a class="brand" href="#/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff3d00"/></linearGradient></defs><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-10z" fill="url(#g)"/></svg><img id="brand-img" alt="" width="22" height="22" style="border-radius:6px;display:none">Elite Uncopylocked</a>
     <nav class="nav" id="nav"></nav>
+    <button class="btn ghost sm" id="more" type="button" aria-label="Menu">⋯</button>
     <a class="btn pri sm" id="hjoin" href="https://discord.gg/2D4KTvA9Sh" target="_blank" rel="noopener">Join Discord</a>
     <div class="row" id="auth" style="margin:0;gap:8px"></div>
     <button class="kbd" id="kbd">Ctrl K</button>
   </div>
+  <div id="menu" hidden></div>
 </header>
 <main id="app"></main>
 <div class="foot-site">© 2026 Elite Uncopylocked. All Rights Reserved.
@@ -193,12 +271,12 @@ async function resolveNames(){
   renderLive();
 }
 function postCard(p){return `<div class="card"><div class="meta">${esc(p.author)} · ${when(p.created_at)}</div><p>${esc(p.text)}</p></div>`}
-function fileCard(f){return `<div class="card"><span class="tag">${esc(f.cat||"File")}</span><h3>${esc(f.title)}</h3><p class="mu">${esc(f.desc)}</p><div class="foot"><span class="meta">${esc(name(f.uid))} · ${when(f.at)}${f.size?` · ${(f.size/1048576).toFixed(1)} MB`:""}</span><button class="btn sm" data-dl="${esc(f.fileId)}|${esc(f.fileName)}">Download</button></div></div>`}
+function fileCard(f){return `<div class="card"><span class="tag">${esc(f.cat)}</span><h3>${esc(f.title)}</h3><p class="mu">${esc(f.description || "")}</p><div class="foot"><span class="meta">by ${esc(f.uploader)} · ${(f.size/1048576).toFixed(2)} MB</span><a class="btn sm" href="${esc(f.url)}" target="_blank" rel="noopener" download>Download</a></div></div>`}
 function listCard(l){return `<div class="card"><span class="tag">${esc(l.cat)}</span><h3>${esc(l.title)}</h3><p class="mu">${esc(l.description)}</p><div class="foot"><div><div class="price">$${Number(l.price).toFixed(2)}</div><span class="meta">by ${esc(l.seller)}</span></div><button class="btn pri sm" data-buy="${esc(l.id)}">Buy</button></div></div>`}
 function reqCard(r){return `<div class="card"><span class="tag">${esc(r.cat)}</span><h3>${esc(r.title)}</h3><p class="mu">${esc(r.description)}</p><div class="foot"><span class="meta">${r.budget ? "Budget: "+esc(r.budget)+" · " : ""}by ${esc(r.requester)}</span></div></div>`}
 function jobCard(j){return `<div class="card"><span class="tag">${esc(j.skill)}</span><h3>${esc(j.title)}</h3><p class="mu">${esc(j.description)}</p><div class="foot"><span class="meta">Budget: ${esc(j.budget || "Negotiated directly")} · by ${esc(j.poster)}</span></div></div>`}
 function renderLive(){
-  const put = (id, arr, fn, emptyMsg) => { const el = $("#"+id); if (el) el.innerHTML = arr.length ? arr.map(fn).join("") : empty(emptyMsg); };
+  const put = (id, arr, fn, emptyMsg) => paged(id, arr, fn, emptyMsg);
   put("feed-posts", C.posts, postCard, "No posts yet. Start the conversation.");
   put("feed-files", C.files, fileCard, "No public files yet. Be the first to share one.");
   put("feed-market", C.listings, listCard, "No listings yet. Sell your first file below.");
@@ -289,13 +367,13 @@ const P = {
     <div class="chips"><button data-q="How do I open a payment ticket?">Payment help</button><button data-q="What commands does the bot have?">Bot commands</button><button data-q="How do I get VIP?">VIP</button><button data-q="Write a Luau script that makes a part bounce when touched.">Luau example</button></div>
   </div>`,
 
-  files: () => `<div class="wrap"><div class="sec-h"><div><div class="eyebrow">Public files</div><h1 style="font-size:34px">Share and download files</h1><p class="lead">Upload free files for the community. Members with Contributor access can upload.</p></div></div>
+  files: () => `<div class="wrap"><div class="sec-h"><div><div class="eyebrow">Public files</div><h1 style="font-size:34px">Share and download files</h1><p class="lead">Upload free files for the community. Members can upload files up to 3 MB.</p></div></div>
     <div class="two">
       <div class="card"><h3>Upload a file</h3>
         <form id="fileF"><label>Title</label><input name="title" required maxlength="80">
         <label>Category</label><select name="cat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
         <label>Description</label><textarea name="desc" rows="3" maxlength="240"></textarea>
-        <label>File (up to 20 MB)</label><input type="file" name="file" required>
+        <label>File (up to 3 MB)</label><input type="file" name="file" required>
         <div class="row" style="margin-top:16px"><button class="btn pri" type="submit">Upload</button></div></form>
       </div>
       <div class="card"><h3>What you can share</h3><p class="mu">Free scripts, models, maps, UI kits, and audio you have the rights to share. Files are visible to community members. Don't upload anything you don't have permission to distribute.</p></div>
@@ -399,6 +477,8 @@ function route(){
   document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("on", a.dataset.r === p));
   window.scrollTo(0,0);
   renderLive();
+  reveal();
+  closeMenu();
 }
 window.addEventListener("hashchange", () => { route(); if (location.hash === "#/vip") refreshVip(); });
 function togglePal(on){
@@ -457,12 +537,12 @@ document.addEventListener("submit", async e => {
     else if (f.id === "buyF") { await placeOrder(v); }
     else if (f.id === "jobF") { if (!gate("post a job")) return; await postJSON("/api/jobs", v); f.reset(); toast("Job posted."); await loadCommunity(); }
     else if (f.id === "fileF") {
-      if (!C.assets) return toast("Uploads need Contributor access to this page.");
-      if (!needDB()) return;
+      if (!gate("upload files")) return;
       const file = f.file.files[0]; if (!file) return toast("Choose a file first.");
-      const up = await C.assets.upload(file);
-      await addDoc("files",{title:v.title, cat:v.cat, desc:v.desc, fileId:up.id, fileName:file.name, size:file.size, uid:C.me, at:Date.now()});
-      f.reset(); toast("File uploaded.");
+      if (file.size > 3 * 1024 * 1024) return toast("Files must be 3 MB or smaller.");
+      const data = await toBase64(file);
+      await postJSON("/api/community?kind=files", {title:v.title, cat:v.cat, description:v.desc, fileName:file.name, contentType:file.type || "application/octet-stream", data});
+      f.reset(); toast("File uploaded."); await loadCommunity();
     }
     else if (f.id === "rsF") { toast("Report received. Thank you."); f.reset(); }
     else if (f.id === "tkF") { toast("Ticket sent. Staff will reply in your ticket."); f.reset(); }
@@ -649,7 +729,7 @@ function showJoin(text){
   $("#joinM").hidden = false;
 }
 function gate(action){
-  if (C.acct && C.acct.member) return true;
+  if (C.acct && (C.acct.member || C.acct.admin)) return true;
   showJoin(C.acct
     ? `You're signed in with ${C.acct.provider === "google" ? "Google" : "Discord"}, but to ${action} you need to be a server member. Join the server, then sign in with Discord.`
     : `Sign in with Discord and join the server to ${action}.`);
@@ -665,8 +745,8 @@ function showJoinNudge(){
 /* ---------- Community posts, jobs and proof ---------- */
 async function loadCommunity(){
   try {
-    const [p, j] = await Promise.all([fetch("/api/posts").then(r => r.json()), fetch("/api/jobs").then(r => r.json())]);
-    C.posts = p.posts || []; C.jobs = j.jobs || []; renderLive();
+    const [p, j, fl] = await Promise.all([fetch("/api/posts").then(r => r.json()), fetch("/api/jobs").then(r => r.json()), fetch("/api/community?kind=files").then(r => r.json())]);
+    C.posts = p.posts || []; C.jobs = j.jobs || []; C.files = fl.files || []; renderLive();
   } catch {}
 }
 async function submitProof(){
@@ -718,6 +798,53 @@ async function vipAction(id, action){
   } catch (err) { toast(err.message || "Something went wrong."); }
 }
 
+/* ---------- Paging, fly-in and the mobile menu ---------- */
+const SHOWN = {};
+const PAGE = 12;
+const revealIO = new IntersectionObserver(entries => entries.forEach(en => {
+  if (en.isIntersecting) { en.target.classList.add("in"); revealIO.unobserve(en.target); }
+}), {threshold: 0.12});
+const moreIO = new IntersectionObserver(entries => entries.forEach(en => {
+  if (!en.isIntersecting) return;
+  const id = en.target.dataset.more; SHOWN[id] = (SHOWN[id] || PAGE) + PAGE; renderLive();
+}), {rootMargin: "240px"});
+function paged(id, arr, fn, emptyMsg){
+  const el = $("#" + id); if (!el) return;
+  if (!arr.length) { el.innerHTML = empty(emptyMsg); return; }
+  const n = Math.min(arr.length, SHOWN[id] || PAGE);
+  el.innerHTML = arr.slice(0, n).map(fn).join("") +
+    (n < arr.length ? `<div class="more" data-more="${id}"><button class="btn ghost sm" type="button">Load more</button></div>` : "");
+  el.querySelectorAll("[data-more]").forEach(m => moreIO.observe(m));
+  reveal(el);
+}
+function reveal(root = document){
+  root.querySelectorAll(".card:not(.fly), .stat:not(.fly)").forEach((el, i) => {
+    if (!el.closest("#app")) return;
+    el.classList.add("fly");
+    el.style.setProperty("--fx", (i % 2 ? "-" : "") + (i % 3 ? "22px" : "0px"));
+    el.style.setProperty("--fy", i % 2 ? "34px" : "18px");
+    revealIO.observe(el);
+  });
+}
+function closeMenu(){ const m = $("#menu"); if (m) m.hidden = true; }
+(function buildMenu(){
+  const m = $("#menu"); if (m) m.innerHTML = ROUTES.map(([k, l]) => `<a href="#/${k}">${l}</a>`).join("");
+  document.addEventListener("click", e => {
+    if (e.target.closest("#more")) { const mm = $("#menu"); mm.hidden = !mm.hidden; return; }
+    if (!e.target.closest("#menu")) closeMenu();
+    const more = e.target.closest("[data-more] button");
+    if (more) { const id = more.closest("[data-more]").dataset.more; SHOWN[id] = (SHOWN[id] || PAGE) + PAGE; renderLive(); }
+  });
+})();
+function toBase64(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1]);
+    r.onerror = () => rej(new Error("Couldn't read the file"));
+    r.readAsDataURL(file);
+  });
+}
+
 /* ---------- Boot ---------- */
 async function boot(){
   [C.db, C.sample, C.assets, C.dl, C.user] = await Promise.all(["db","sample","assets","downloads","user"].map(use));
@@ -741,6 +868,20 @@ loadCommunity();
 loadMe();
 setTimeout(showJoinNudge, 9000);
 setInterval(loadDiscord, 300000);
+</script>
+<script>
+(function(){
+  const box = document.createElement("div"); box.className = "ember-rain"; document.body.prepend(box);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  for (let k = 0; k < 26; k++){
+    const e = document.createElement("i");
+    e.style.left = (Math.random()*100) + "%";
+    e.style.animationDuration = (7 + Math.random()*9) + "s";
+    e.style.animationDelay = (-Math.random()*12) + "s";
+    e.style.width = e.style.height = (2 + Math.random()*3) + "px";
+    box.appendChild(e);
+  }
+})();
 </script>
 </body>
 </html>
