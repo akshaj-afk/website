@@ -2,6 +2,7 @@
 // Called as /api/community?kind=posts|jobs|requests|listings (vercel.json maps the old URLs here).
 import { ensureSchema, sql, readBody, clean, limited, notify, CATS } from "../lib/db.js";
 import { getUser, membership, isAdmin, grantVipRole } from "../lib/auth.js";
+import { put } from "@vercel/blob";
 
 async function listings(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -19,7 +20,7 @@ async function listings(req, res) {
 
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: "Sign in with Discord to do this." });
-  if (!user.member) return res.status(403).json({ error: "Sign in with Discord and join the server to do this." });
+  if (!user.member && !isAdmin(user)) return res.status(403).json({ error: "Sign in with Discord and join the server to do this." });
   if (limited(req, "listings", 5)) return res.status(429).json({ error: "Too many listings. Try again in a minute." });
   const b = await readBody(req);
   const title = clean(b.title, 80);
@@ -112,7 +113,46 @@ async function requests(req, res) {
   return res.status(201).json({ id: row.id });
 }
 
-const KINDS = { listings, posts, jobs, requests };
+
+async function files(req, res) {
+  if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  try { await ensureSchema(); } catch (e) { return res.status(503).json({ error: e.message }); }
+
+  if (req.method === "GET") {
+    const rows = await sql`SELECT id, title, cat, description, file_name, size, url, uploader, created_at
+                           FROM public_files ORDER BY created_at DESC LIMIT 200`;
+    return res.status(200).json({ files: rows });
+  }
+
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: "Sign in with Discord to upload." });
+  if (!user.member && !isAdmin(user)) return res.status(403).json({ error: "Sign in with Discord and join the server to upload." });
+  if (limited(req, "files", 4)) return res.status(429).json({ error: "Slow down. Try again in a minute." });
+
+  const b = await readBody(req);
+  const title = clean(b.title, 80);
+  const cat = clean(b.cat, 30);
+  const description = clean(b.description, 300);
+  const fileName = clean(b.fileName, 120).replace(/[^\w.\- ]/g, "_") || "file";
+  const contentType = clean(b.contentType, 100) || "application/octet-stream";
+  if (!title) return res.status(400).json({ error: "Add a title." });
+  if (!CATS.includes(cat)) return res.status(400).json({ error: "Pick a valid category." });
+  if (typeof b.data !== "string" || !b.data) return res.status(400).json({ error: "Choose a file first." });
+
+  const buf = Buffer.from(b.data, "base64");
+  if (buf.length === 0) return res.status(400).json({ error: "The file is empty." });
+  if (buf.length > 3 * 1024 * 1024) return res.status(413).json({ error: "Files must be 3 MB or smaller." });
+
+  const blob = await put(`public-files/${Date.now()}-${fileName}`, buf, { access: "public", contentType });
+  const uploader = clean(user.name, 40);
+  const [row] = await sql`INSERT INTO public_files (title, cat, description, file_name, size, url, uploader)
+                          VALUES (${title}, ${cat}, ${description}, ${fileName}, ${buf.length}, ${blob.url}, ${uploader})
+                          RETURNING id`;
+  await notify(`📁 New public file #${row.id}: **${title}** (${cat}) by ${uploader}`);
+  return res.status(201).json({ id: row.id, url: blob.url });
+}
+
+const KINDS = { listings, posts, jobs, requests, files };
 
 export default function handler(req, res) {
   const kind = new URL(req.url, "http://x").searchParams.get("kind") || req.query?.kind;
