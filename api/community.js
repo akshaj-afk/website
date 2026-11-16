@@ -93,6 +93,66 @@ async function jobs(req, res) {
   return res.status(201).json({ id: row.id });
 }
 
+// Bot-side categories (must match the bot's /ticketsetup and request options).
+const REQUEST_CATS = ["Scripting", "Building", "UI", "VFX", "Other"];
+const DISCORD_API = "https://discord.com/api/v10";
+const PERM = { VIEW: 1024, SEND: 2048, HISTORY: 65536 };
+
+async function discordApi(method, path, body) {
+  const r = await fetch(`${DISCORD_API}${path}`, {
+    method,
+    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`Discord ${r.status}: ${data.message || "request failed"}`);
+  return data;
+}
+
+// Opens a private ticket channel in the bot's ticket category and pings staff.
+// Uses the same Discord server, category and support role as the bot's /ticketsetup.
+async function openRequestTicket({ user, title, cat, budget, description }) {
+  const guild = process.env.DISCORD_GUILD_ID;
+  const category = process.env.TICKET_CATEGORY_ID;
+  const staffRole = process.env.SUPPORT_ROLE_ID;
+  if (!guild || !category || !staffRole || !process.env.DISCORD_BOT_TOKEN) {
+    throw new Error("Missing DISCORD_GUILD_ID, TICKET_CATEGORY_ID, SUPPORT_ROLE_ID or DISCORD_BOT_TOKEN");
+  }
+  const uid = String(user.id);
+  const who = clean(user.name, 20).toLowerCase().replace(/[^a-z0-9-]/g, "") || "member";
+  const allow = String(PERM.VIEW + PERM.SEND + PERM.HISTORY);
+
+  const channel = await discordApi("POST", `/guilds/${guild}/channels`, {
+    name: `request-${who}-${Date.now().toString().slice(-4)}`,
+    type: 0,
+    parent_id: category,
+    permission_overwrites: [
+      { id: guild, type: 0, deny: String(PERM.VIEW) },   // hide from everyone else
+      { id: uid, type: 1, allow },                        // the requester
+      { id: staffRole, type: 0, allow },                  // staff
+    ],
+  });
+
+  await discordApi("POST", `/channels/${channel.id}/messages`, {
+    content: `<@&${staffRole}> New file request from <@${uid}>!`,
+    allowed_mentions: { roles: [staffRole], users: [uid] },
+    embeds: [{
+      title: "📥 File Request",
+      color: 0x3498db,
+      fields: [
+        { name: "Title", value: title, inline: false },
+        { name: "Category", value: cat, inline: true },
+        { name: "Budget", value: budget, inline: true },
+        { name: "Details", value: description, inline: false },
+        { name: "Next Steps", value: "Staff will reply in this channel.", inline: false },
+      ],
+      footer: { text: "Requested on the website" },
+    }],
+  });
+
+  return { id: channel.id, url: `https://discord.com/channels/${guild}/${channel.id}` };
+}
+
 async function requests(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try { await ensureSchema(); } catch (e) { return res.status(503).json({ error: e.message }); }
@@ -104,26 +164,28 @@ async function requests(req, res) {
   }
 
   const user = getUser(req);
-  if (!user) return res.status(401).json({ error: "Sign in with Discord to do this." });
-  if (!user.member) return res.status(403).json({ error: "Sign in with Discord and join the server to do this." });
-  if (limited(req, "requests", 5)) return res.status(429).json({ error: "Too many requests. Try again in a minute." });
-  const b = await readBody(req);
+  if (!user) return res.status(401).json({ error: "Sign in with Discord to request a file." });
+  if (!user.member) return res.status(403).json({ error: "Sign in with Discord and join the server to request a file." });
+
+  const b = (await readBody(req)) || {};
   const title = clean(b.title, 80);
   const cat = clean(b.cat, 30);
-  const budget = clean(b.budget, 40) || null;
-  const description = clean(b.description, 300);
-  const requester = clean(user.name, 40);
+  const budget = clean(b.budget, 40) || "Not given";
+  const description = clean(b.description ?? b.desc, 300);
+  if (!title || !description) return res.status(400).json({ error: "Fill in the title and description." });
+  if (!REQUEST_CATS.includes(cat)) return res.status(400).json({ error: "Pick a valid category." });
+  if (limited(req, "requests", 5)) return res.status(429).json({ error: "Too many requests. Try again in a minute." });
 
-  if (!title || !description || !requester) return res.status(400).json({ error: "Fill in the title, description and your Discord name." });
-  if (!CATS.includes(cat)) return res.status(400).json({ error: "Pick a valid category." });
-
-  const [row] = await sql`INSERT INTO requests (title, cat, budget, description, requester)
-                          VALUES (${title}, ${cat}, ${budget}, ${description}, ${requester})
-                          RETURNING id`;
-  await alert(`📥 New file request #${row.id}: **${title}** (${cat})${budget ? ` · budget ${budget}` : ""} from ${requester}`);
-  return res.status(201).json({ id: row.id });
+  try {
+    const ticket = await openRequestTicket({ user, title, cat, budget, description });
+    await sql`INSERT INTO requests (title, cat, budget, description, requester)
+              VALUES (${title}, ${cat}, ${budget}, ${description}, ${clean(user.name, 40)})`;
+    return res.status(201).json({ id: ticket.id, url: ticket.url, message: "Your request ticket is open in Discord." });
+  } catch (e) {
+    console.error("Request ticket failed:", e);
+    return res.status(502).json({ error: "Couldn't open your ticket. If this keeps happening, DM @legend_demon_404 on Discord." });
+  }
 }
-
 
 async function files(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
