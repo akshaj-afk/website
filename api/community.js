@@ -2,6 +2,9 @@
 // Called as /api/community?kind=posts|jobs|requests|listings (vercel.json maps the old URLs here).
 import { ensureSchema, sql, readBody, clean, limited, notify, CATS } from "../lib/db.js";
 import { getUser, membership, isAdmin, grantVipRole } from "../lib/auth.js";
+
+// A failed staff alert must not make a saved submission look like it failed.
+const alert = (msg) => Promise.resolve().then(() => notify(msg)).catch((e) => console.error("notify failed:", e));
 import { put } from "@vercel/blob";
 
 async function listings(req, res) {
@@ -38,7 +41,7 @@ async function listings(req, res) {
   const [row] = await sql`INSERT INTO listings (title, cat, price_cents, description, seller, file_url)
                           VALUES (${title}, ${cat}, ${Math.round(price * 100)}, ${description}, ${seller}, ${fileUrl})
                           RETURNING id`;
-  await notify(`🛒 New listing #${row.id}: **${title}** (${cat}) for $${price.toFixed(2)} by ${seller}`);
+  await alert(`🛒 New listing #${row.id}: **${title}** (${cat}) for $${price.toFixed(2)} by ${seller}`);
   return res.status(201).json({ id: row.id });
 }
 
@@ -86,7 +89,7 @@ async function jobs(req, res) {
   const poster = clean(user.name, 40);
   const [row] = await sql`INSERT INTO jobs (title, skill, budget, description, poster)
                           VALUES (${title}, ${skill}, ${budget}, ${description}, ${poster}) RETURNING id`;
-  await notify(`💼 New job #${row.id}: **${title}** (${skill})${budget ? ` · ${budget}` : ""} posted by ${poster}`);
+  await alert(`💼 New job #${row.id}: **${title}** (${skill})${budget ? ` · ${budget}` : ""} posted by ${poster}`);
   return res.status(201).json({ id: row.id });
 }
 
@@ -117,7 +120,7 @@ async function requests(req, res) {
   const [row] = await sql`INSERT INTO requests (title, cat, budget, description, requester)
                           VALUES (${title}, ${cat}, ${budget}, ${description}, ${requester})
                           RETURNING id`;
-  await notify(`📥 New file request #${row.id}: **${title}** (${cat})${budget ? ` · budget ${budget}` : ""} from ${requester}`);
+  await alert(`📥 New file request #${row.id}: **${title}** (${cat})${budget ? ` · budget ${budget}` : ""} from ${requester}`);
   return res.status(201).json({ id: row.id });
 }
 
@@ -156,7 +159,7 @@ async function files(req, res) {
   const [row] = await sql`INSERT INTO public_files (title, cat, description, file_name, size, url, uploader)
                           VALUES (${title}, ${cat}, ${description}, ${fileName}, ${buf.length}, ${blob.url}, ${uploader})
                           RETURNING id`;
-  await notify(`📁 New public file #${row.id}: **${title}** (${cat}) by ${uploader}`);
+  await alert(`📁 New public file #${row.id}: **${title}** (${cat}) by ${uploader}`);
   return res.status(201).json({ id: row.id, url: blob.url });
 }
 
