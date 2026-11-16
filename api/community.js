@@ -59,7 +59,8 @@ async function posts(req, res) {
   return res.status(201).json({ id: row.id });
 }
 
-const SKILLS = ["Scripting", "Building", "UI", "VFX", "Other"];
+// Accepts any capitalization, so "scripting", "UI" and "vfx" all work.
+const SKILLS = { scripting: "Scripting", building: "Building", ui: "UI", vfx: "VFX", other: "Other" };
 
 async function jobs(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -71,14 +72,21 @@ async function jobs(req, res) {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: "Sign in with Discord to do this." });
   if (!user.member) return res.status(403).json({ error: "Sign in with Discord and join the server to do this." });
-  if (limited(req, "jobs", 4)) return res.status(429).json({ error: "Slow down. Try again in a minute." });
-  const b = await readBody(req);
-  const title = clean(b.title, 80), skill = clean(b.skill, 20), budget = clean(b.budget, 40) || null, description = clean(b.description, 300);
+
+  // Validate first, so a bad form submission does not count against the rate limit.
+  const b = (await readBody(req)) || {};
+  const title = clean(b.title, 80);
+  const skill = SKILLS[clean(b.skill, 30).toLowerCase()];
+  const budget = clean(b.budget, 40) || null;
+  const description = clean(b.description ?? b.desc, 300);
   if (!title || !description) return res.status(400).json({ error: "Add a title and description." });
-  if (!SKILLS.includes(skill)) return res.status(400).json({ error: "Pick a valid skill." });
+  if (!skill) return res.status(400).json({ error: "Pick a valid skill: Scripting, Building, UI, VFX or Other." });
+  if (limited(req, "jobs", 4)) return res.status(429).json({ error: "Slow down. Try again in a minute." });
+
+  const poster = clean(user.name, 40);
   const [row] = await sql`INSERT INTO jobs (title, skill, budget, description, poster)
-                          VALUES (${title}, ${skill}, ${budget}, ${description}, ${clean(user.name, 40)}) RETURNING id`;
-  await notify(`💼 New job #${row.id}: **${title}** (${skill})${budget ? ` · ${budget}` : ""} posted by ${clean(user.name, 40)}`);
+                          VALUES (${title}, ${skill}, ${budget}, ${description}, ${poster}) RETURNING id`;
+  await notify(`💼 New job #${row.id}: **${title}** (${skill})${budget ? ` · ${budget}` : ""} posted by ${poster}`);
   return res.status(201).json({ id: row.id });
 }
 
