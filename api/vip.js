@@ -3,6 +3,9 @@
 import { ensureSchema, sql, readBody, clean, limited, notify, CATS } from "../lib/db.js";
 import { getUser, membership, isAdmin, grantVipRole } from "../lib/auth.js";
 
+// Accepts any capitalization or spacing the form might send, e.g. "PayPal", "Roblox Gamepass".
+const METHODS = { paypal: "paypal", gamepass: "gamepass", "roblox gamepass": "gamepass", roblox: "gamepass" };
+
 async function vipMember(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try { await ensureSchema(); } catch (e) { return res.status(503).json({ error: e.message }); }
@@ -19,12 +22,13 @@ async function vipMember(req, res) {
   }
   if (ms.vip) return res.status(409).json({ error: "You already have VIP." });
 
-  if (limited(req, "vip", 5)) return res.status(429).json({ error: "Slow down. Try again in a minute." });
-  const b = await readBody(req);
-  const method = clean(b.method, 20);
+  // Validate first, so a bad form submission does not count against the rate limit.
+  const b = (await readBody(req)) || {};
+  const method = METHODS[clean(b.method, 40).toLowerCase()];
   const proof = clean(b.proof, 300);
-  if (!["paypal", "gamepass"].includes(method)) return res.status(400).json({ error: "Pick PayPal or Roblox Gamepass." });
+  if (!method) return res.status(400).json({ error: "Pick PayPal or Roblox Gamepass." });
   if (proof.length < 6) return res.status(400).json({ error: "Add your PayPal transaction ID or a link to your receipt screenshot." });
+  if (limited(req, "vip", 5)) return res.status(429).json({ error: "Slow down. Try again in a minute." });
 
   const discordId = String(user.id);
   const name = clean(user.name, 40);
