@@ -258,6 +258,8 @@ const BOT = {
 };
 const EMBED_FOOTER = "© 2026 Elite Uncopylocked. All Rights Reserved.\nFor any problems, please DM @magmafox63911";
 const CATS = ["Decompiled","Uncopylocked","Custom","Scripts","Maps","UI","VFX","Audio","Packs"];
+// Must match REQUEST_CATS in api/community.js.
+const REQ_CATS = ["Scripting","Building","UI","VFX","Other"];
 const ROUTES = [["home","Home"],["chat","AI Chat"],["files","Public Files"],["posts","Community"],["market","Marketplace"],["services","Services"],["jobs","Jobs"],["vip","VIP"],["commands","Bot Commands"],["team","Team"],["safety","Safety"],["support","Support"],["requests","File Requests"]];
 
 const RULES = `You are the assistant for Elite Uncopylocked, a Roblox creator community. Answer clearly and concisely. Format answers with Markdown: **bold** for key terms, short bullet or numbered lists for steps, and fenced code blocks for code. You help with Luau and Roblox scripting, game systems, UI, building, and using this community's site and bot.
@@ -483,7 +485,7 @@ const P = {
     <div class="two" style="grid-template-columns:1fr 1.4fr;align-items:start">
       <div class="card"><h3>New request</h3><form id="reqF">
         <label>Title</label><input name="title" required maxlength="80">
-        <label>Category</label><select name="cat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+        <label>Category</label><select name="cat">${REQ_CATS.map(c=>`<option>${c}</option>`).join("")}</select>
         <label>Budget (optional)</label><input name="budget" maxlength="40" placeholder="e.g. $50">
         <label>Description</label><textarea name="description" rows="4" maxlength="300" required></textarea>
         
@@ -559,7 +561,7 @@ document.addEventListener("submit", async e => {
   try {
     if (f.id === "postF") { if (!gate("post in the community")) return; await postJSON("/api/posts", {text:v.t}); f.reset(); toast("Posted."); await loadCommunity(); }
     else if (f.id === "listF") { if (!gate("sell files")) return; await postJSON("/api/listings", {title:v.title, cat:v.cat, price:v.price, description:v.desc, seller:v.seller, fileUrl:v.fileUrl}); f.reset(); toast("Listing published."); await loadMarket(); }
-    else if (f.id === "reqF") { if (!gate("request files")) return; await postJSON("/api/requests", v); f.reset(); toast("Request posted."); await loadMarket(); }
+    else if (f.id === "reqF") { if (!gate("request files")) return; await submitFileRequest(v, f); }
     else if (f.id === "vipF") { if (!gate("buy VIP")) return; await postJSON("/api/vip", {method:v.method, proof:v.proof}); f.reset(); toast("Proof sent. Staff will check it and give you VIP."); await loadVipStatus(); }
     else if (f.id === "buyF") { await placeOrder(v); }
     else if (f.id === "jobF") { if (!gate("post a job")) return; await postJSON("/api/jobs", v); f.reset(); toast("Job posted."); await loadCommunity(); }
@@ -682,9 +684,39 @@ async function postJSON(path, obj){
   if (!r.ok) throw new Error(j.error || "Something went wrong.");
   return j;
 }
+// Creates a Discord ticket. Success is shown only after the server returns 201 with the ticket link.
+async function submitFileRequest(v, form){
+  const r = await fetch("/api/community?kind=requests", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({title: v.title, cat: v.cat, budget: v.budget, description: v.description}),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.url) {
+    if (r.status === 401) throw new Error("Sign in with Discord to request a file.");
+    if (r.status === 403) throw new Error("Join the Discord server to request a file.");
+    throw new Error(j.error || ("Request failed (" + r.status + "). No ticket was created."));
+  }
+  form.reset();
+  showTicketToast(j.url);
+  await loadMarket();
+}
+function showTicketToast(url){
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.append("Ticket created! Staff will reply in Discord. ");
+  if (/^https:\/\/discord\.com\//.test(url)) {
+    const a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "Open ticket"; a.style.color = "inherit"; a.style.textDecoration = "underline";
+    t.appendChild(a);
+  }
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 8000);
+}
 async function loadMarket(){
   try {
-    const [l, q] = await Promise.all([fetch("/api/listings").then(r => r.json()), fetch("/api/requests").then(r => r.json())]);
+    const [l, q] = await Promise.all([fetch("/api/listings").then(r => r.json()), fetch("/api/community?kind=requests").then(r => r.json())]);
     C.listings = l.listings || []; C.requests = q.requests || []; renderLive();
   } catch {}
 }
