@@ -574,7 +574,7 @@ document.addEventListener("submit", async e => {
       f.reset(); toast("File uploaded."); await loadCommunity();
     }
     else if (f.id === "rsF") { toast("Report received. Thank you."); f.reset(); }
-    else if (f.id === "tkF") { toast("Ticket sent. Staff will reply in your ticket."); f.reset(); }
+    else if (f.id === "tkF") { if (!gate("open a support ticket")) return; await submitSupportTicket(v, f); }
   } catch (err) {
     toast(err && err.message && !err.code ? err.message : err && err.code === "too_large" ? "That file is too large (max 20 MB)." : err && err.code === "unsupported_type" ? "That file type isn't supported." : "Something went wrong. Please try again.");
   } finally { if (btn) btn.disabled = false; }
@@ -700,6 +700,22 @@ async function submitFileRequest(v, form){
   form.reset();
   showTicketToast(j.url);
   await loadMarket();
+}
+// Opens a Discord support ticket. Success is shown only after the server returns the ticket link.
+async function submitSupportTicket(v, form){
+  const r = await fetch("/api/community?kind=support", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({subject: v.s, message: v.m}),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.url) {
+    if (r.status === 401) throw new Error("Sign in with Discord to open a support ticket.");
+    if (r.status === 403) throw new Error("Join the Discord server to open a support ticket.");
+    throw new Error(j.error || ("Could not open the ticket (" + r.status + "). No ticket was created."));
+  }
+  form.reset();
+  showTicketToast(j.url);
 }
 function showTicketToast(url){
   const t = document.createElement("div");
