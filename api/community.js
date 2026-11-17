@@ -311,9 +311,18 @@ async function support(req, res) {
 
 const KINDS = { listings, posts, jobs, requests, files, ticketcheck, support };
 
-export default function handler(req, res) {
+// Every route runs inside this wrapper. An unexpected crash is logged with its stack trace and returned
+// as JSON, so the page shows the real reason instead of a generic failure.
+export default async function handler(req, res) {
   const kind = new URL(req.url, "http://x").searchParams.get("kind") || req.query?.kind;
   const fn = KINDS[kind];
   if (!fn) return res.status(404).json({ error: "Not found" });
-  return fn(req, res);
+  try {
+    return await fn(req, res);
+  } catch (e) {
+    console.error(`[community:${kind}] unhandled error:`, e && e.stack ? e.stack : e);
+    if (res.headersSent) return;
+    const msg = String((e && e.message) || "unknown error").slice(0, 200);
+    return res.status(500).json({ error: `Server error on ${kind}: ${msg}. The site logs have the full details.` });
+  }
 }
