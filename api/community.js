@@ -1,11 +1,14 @@
 // Community API: posts, jobs, file requests and file listings.
-// Called as /api/community?kind=posts|jobs|requests|listings (vercel.json maps the old URLs here).
+// Called as /api/community?kind=posts|jobs|requests|listings|files|ticketcheck
 import { ensureSchema, sql, readBody, clean, limited, notify, CATS } from "../lib/db.js";
-import { getUser, membership, isAdmin, grantVipRole } from "../lib/auth.js";
+import { getUser, membership, isAdmin } from "../lib/auth.js";
+import {
+  discordApi, ticketConfig, botUserId, createTicketChannel, deleteChannelQuietly, friendlyDiscordError, PERM,
+} from "../lib/discord.js";
+import { put } from "@vercel/blob";
 
 // A failed staff alert must not make a saved submission look like it failed.
 const alert = (msg) => Promise.resolve().then(() => notify(msg)).catch((e) => console.error("notify failed:", e));
-import { put } from "@vercel/blob";
 
 async function listings(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -93,66 +96,16 @@ async function jobs(req, res) {
   return res.status(201).json({ id: row.id });
 }
 
-// Bot-side categories (must match the bot's /ticketsetup and request options).
 const REQUEST_CATS = ["Scripting", "Building", "UI", "VFX", "Other"];
-const DISCORD_API = "https://discord.com/api/v10";
-const PERM = { VIEW: 1024, SEND: 2048, HISTORY: 65536 };
 
-async function discordApi(method, path, body) {
-  const r = await fetch(`${DISCORD_API}${path}`, {
-    method,
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(`Discord ${r.status}: ${data.message || "request failed"}`);
-  return data;
-}
-
-// Opens a private ticket channel in the bot's ticket category and pings staff.
-// Uses the same Discord server, category and support role as the bot's /ticketsetup.
-async function openRequestTicket({ user, title, cat, budget, description }) {
-  const guild = process.env.DISCORD_GUILD_ID;
-  const category = process.env.TICKET_CATEGORY_ID;
-  const staffRole = process.env.SUPPORT_ROLE_ID;
-  if (!guild || !category || !staffRole || !process.env.DISCORD_BOT_TOKEN) {
-    throw new Error("Missing DISCORD_GUILD_ID, TICKET_CATEGORY_ID, SUPPORT_ROLE_ID or DISCORD_BOT_TOKEN");
-  }
-  const uid = String(user.id);
-  const who = clean(user.name, 20).toLowerCase().replace(/[^a-z0-9-]/g, "") || "member";
-  const allow = String(PERM.VIEW + PERM.SEND + PERM.HISTORY);
-
-  const channel = await discordApi("POST", `/guilds/${guild}/channels`, {
-    name: `request-${who}-${Date.now().toString().slice(-4)}`,
-    type: 0,
-    parent_id: category,
-    permission_overwrites: [
-      { id: guild, type: 0, deny: String(PERM.VIEW) },   // hide from everyone else
-      { id: uid, type: 1, allow },                        // the requester
-      { id: staffRole, type: 0, allow },                  // staff
-    ],
-  });
-
-  await discordApi("POST", `/channels/${channel.id}/messages`, {
-    content: `<@&${staffRole}> New file request from <@${uid}>!`,
-    allowed_mentions: { roles: [staffRole], users: [uid] },
-    embeds: [{
-      title: "📥 File Request",
-      color: 0x3498db,
-      fields: [
-        { name: "Title", value: title, inline: false },
-        { name: "Category", value: cat, inline: true },
-        { name: "Budget", value: budget, inline: true },
-        { name: "Details", value: description, inline: false },
-        { name: "Next Steps", value: "Staff will reply in this channel.", inline: false },
-      ],
-      footer: { text: "Requested on the website" },
-    }],
-  });
-
-  return { id: channel.id, url: `https://discord.com/channels/${guild}/${channel.id}` };
-}
-
+// File requests. Order of operations:
+//   1. Check sign-in and live server membership.
+//   2. Validate the form.
+//   3. Save the request as 'pending' in Neon so it has an ID for the buttons.
+//   4. Create the Discord channel and post the ticket message.
+//   5. Mark the request 'open' with the channel ID.
+// If step 4 or 5 fails, the channel is removed and the request is marked 'failed'.
+// The response is 201 only when the ticket exists in Discord and the database.
 async function requests(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try { await ensureSchema(); } catch (e) { return res.status(503).json({ error: e.message }); }
@@ -165,7 +118,9 @@ async function requests(req, res) {
 
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: "Sign in with Discord to request a file." });
-  if (!user.member) return res.status(403).json({ error: "Sign in with Discord and join the server to request a file." });
+  // Live check (cached 60s) instead of trusting the membership flag saved in the cookie at sign-in.
+  const ms = await membership(user);
+  if (!ms.member) return res.status(403).json({ error: "Sign in with Discord and join the server to request a file." });
 
   const b = (await readBody(req)) || {};
   const title = clean(b.title, 80);
@@ -176,15 +131,95 @@ async function requests(req, res) {
   if (!REQUEST_CATS.includes(cat)) return res.status(400).json({ error: "Pick a valid category." });
   if (limited(req, "requests", 5)) return res.status(429).json({ error: "Too many requests. Try again in a minute." });
 
-  try {
-    const ticket = await openRequestTicket({ user, title, cat, budget, description });
-    await sql`INSERT INTO requests (title, cat, budget, description, requester)
-              VALUES (${title}, ${cat}, ${budget}, ${description}, ${clean(user.name, 40)})`;
-    return res.status(201).json({ id: ticket.id, url: ticket.url, message: "Your request ticket is open in Discord." });
-  } catch (e) {
-    console.error("Request ticket failed:", e);
-    return res.status(502).json({ error: "Couldn't open your ticket. If this keeps happening, DM @legend_demon_404 on Discord." });
+  const cfg = ticketConfig();
+  if (cfg.problems.length) {
+    console.error("[ticket] configuration problem:", cfg.problems.join("; "));
+    return res.status(500).json({ error: "The ticket system is not configured yet. The site admin needs to check the Vercel environment variables." });
   }
+
+  const requester = clean(user.name, 40);
+  const requesterId = String(user.id);
+  const [row] = await sql`INSERT INTO requests (title, cat, budget, description, requester, requester_id, status)
+                          VALUES (${title}, ${cat}, ${budget}, ${description}, ${requester}, ${requesterId}, 'pending')
+                          RETURNING id`;
+  const requestId = row.id;
+
+  let channel = null;
+  try {
+    channel = await createTicketChannel({
+      cfg,
+      ticket: { id: requestId, title, cat, budget, description, requester, requester_id: requesterId, status: "open", claimed_by: null },
+    });
+    await sql`UPDATE requests SET status = 'open', channel_id = ${channel.id}, message_id = ${channel.messageId}
+              WHERE id = ${requestId}`;
+  } catch (e) {
+    console.error(`[ticket] request #${requestId} was not opened:`, e && e.message ? e.message : e);
+    if (channel) await deleteChannelQuietly(channel.id, requestId);
+    const reason = friendlyDiscordError(e);
+    await sql`UPDATE requests SET status = 'failed', error = ${reason} WHERE id = ${requestId}`
+      .catch(err => console.error("[ticket] could not mark request as failed:", err.message));
+    return res.status(502).json({ error: `${reason} No ticket was left behind, so please try again.`, code: (e && e.code) || null });
+  }
+
+  return res.status(201).json({
+    id: requestId,
+    channelId: channel.id,
+    url: channel.url,
+    message: "Your request ticket is open in Discord.",
+  });
+}
+
+// Admin-only diagnostics. Open /api/community?kind=ticketcheck while signed in as the admin.
+// It checks each setting against Discord and reports pass/fail without showing any secret.
+async function ticketcheck(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
+  if (!isAdmin(getUser(req))) return res.status(403).json({ error: "Admins only." });
+
+  const cfg = ticketConfig();
+  const out = { config: cfg.problems.length ? cfg.problems : "ok" };
+  const check = async (name, fn) => {
+    try { out[name] = { ok: true, ...(await fn()) }; }
+    catch (e) { out[name] = { ok: false, detail: e.message, hint: friendlyDiscordError(e) }; }
+  };
+
+  await check("bot", async () => {
+    const me = await discordApi("GET", "/users/@me");
+    return { id: me.id, username: me.username };
+  });
+  if (cfg.problems.length) return res.status(200).json(out);
+
+  await check("guild", async () => {
+    const g = await discordApi("GET", `/guilds/${cfg.guild}`);
+    return { name: g.name };
+  });
+  await check("category", async () => {
+    const c = await discordApi("GET", `/channels/${cfg.category}`);
+    return { name: c.name, isCategory: c.type === 4, inThisGuild: c.guild_id === cfg.guild };
+  });
+  await check("supportRole", async () => {
+    const roles = await discordApi("GET", `/guilds/${cfg.guild}/roles`);
+    const r = roles.find(x => x.id === cfg.staffRole);
+    if (!r) throw new Error("no role with that ID exists in this server");
+    return { name: r.name };
+  });
+  await check("botPermissions", async () => {
+    const id = await botUserId();
+    const roles = await discordApi("GET", `/guilds/${cfg.guild}/roles`);
+    const member = await discordApi("GET", `/guilds/${cfg.guild}/members/${id}`);
+    const byId = new Map(roles.map(r => [r.id, BigInt(r.permissions)]));
+    let perms = byId.get(cfg.guild) || 0n;
+    for (const rid of member.roles) perms |= byId.get(rid) || 0n;
+    const has = (bit) => (perms & 8n) !== 0n || (perms & BigInt(bit)) !== 0n;
+    return {
+      canManageChannels: has(PERM.MANAGE_CHANNELS),
+      canView: has(PERM.VIEW),
+      canSend: has(PERM.SEND),
+      canReadHistory: has(PERM.HISTORY),
+      note: "Server-wide permissions only. Category overrides are not included.",
+    };
+  });
+
+  return res.status(200).json(out);
 }
 
 async function files(req, res) {
@@ -225,7 +260,7 @@ async function files(req, res) {
   return res.status(201).json({ id: row.id, url: blob.url });
 }
 
-const KINDS = { listings, posts, jobs, requests, files };
+const KINDS = { listings, posts, jobs, requests, files, ticketcheck };
 
 export default function handler(req, res) {
   const kind = new URL(req.url, "http://x").searchParams.get("kind") || req.query?.kind;
