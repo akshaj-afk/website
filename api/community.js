@@ -112,7 +112,7 @@ async function requests(req, res) {
 
   if (req.method === "GET") {
     const rows = await sql`SELECT id, title, cat, budget, description, requester, created_at
-                           FROM requests WHERE status = 'open' ORDER BY created_at DESC LIMIT 100`;
+                           FROM requests WHERE status = 'open' AND cat <> 'Support' ORDER BY created_at DESC LIMIT 100`;
     return res.status(200).json({ requests: rows });
   }
 
@@ -260,7 +260,56 @@ async function files(req, res) {
   return res.status(201).json({ id: row.id, url: blob.url });
 }
 
-const KINDS = { listings, posts, jobs, requests, files, ticketcheck };
+// Support tickets from the Get help form. Same Discord channel, buttons and rollback as file requests.
+async function support(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  try { await ensureSchema(); } catch (e) { return res.status(503).json({ error: e.message }); }
+
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: "Sign in with Discord to open a support ticket." });
+  const ms = await membership(user);
+  if (!ms.member) return res.status(403).json({ error: "Join the Discord server to open a support ticket." });
+
+  const b = (await readBody(req)) || {};
+  const subject = clean(b.subject ?? b.s, 80);
+  const message = clean(b.message ?? b.m, 300);
+  if (!subject || !message) return res.status(400).json({ error: "Add a subject and a message." });
+  if (limited(req, "support", 3)) return res.status(429).json({ error: "Slow down. Try again in a minute." });
+
+  const cfg = ticketConfig();
+  if (cfg.problems.length) {
+    console.error("[ticket] configuration problem:", cfg.problems.join("; "));
+    return res.status(500).json({ error: "The ticket system is not configured yet. The site admin needs to check the Vercel environment variables." });
+  }
+
+  const requester = clean(user.name, 40);
+  const requesterId = String(user.id);
+  const [row] = await sql`INSERT INTO requests (title, cat, budget, description, requester, requester_id, status)
+                          VALUES (${subject}, 'Support', 'N/A', ${message}, ${requester}, ${requesterId}, 'pending')
+                          RETURNING id`;
+  const requestId = row.id;
+
+  let channel = null;
+  try {
+    channel = await createTicketChannel({
+      cfg,
+      ticket: { id: requestId, title: subject, cat: "Support", budget: "N/A", description: message, requester, requester_id: requesterId, status: "open", claimed_by: null },
+    });
+    await sql`UPDATE requests SET status = 'open', channel_id = ${channel.id}, message_id = ${channel.messageId}
+              WHERE id = ${requestId}`;
+  } catch (e) {
+    console.error(`[ticket] support #${requestId} was not opened:`, e && e.message ? e.message : e);
+    if (channel) await deleteChannelQuietly(channel.id, requestId);
+    const reason = friendlyDiscordError(e);
+    await sql`UPDATE requests SET status = 'failed', error = ${reason} WHERE id = ${requestId}`
+      .catch(err => console.error("[ticket] could not mark support ticket as failed:", err.message));
+    return res.status(502).json({ error: `${reason} No ticket was left behind, so please try again.`, code: (e && e.code) || null });
+  }
+
+  return res.status(201).json({ id: requestId, channelId: channel.id, url: channel.url, message: "Your support ticket is open in Discord." });
+}
+
+const KINDS = { listings, posts, jobs, requests, files, ticketcheck, support };
 
 export default function handler(req, res) {
   const kind = new URL(req.url, "http://x").searchParams.get("kind") || req.query?.kind;
