@@ -266,14 +266,17 @@ const RULES = `You are the assistant for Elite Uncopylocked, a Roblox creator co
 Facts you may state: Owner is Legend (@legend_demon_404). Chief and Bot Developer is Magma (@magmafox63911). Questions go to @magmafox63911.
 Bot slash commands (the only commands that exist): /setup, /welcomesetup, /boostrolesetup, /ticketpanel, /ticketsetup, /aichatsetup, /aichatoff, /balance, /chatstats, /daily, /pay, /payment, /tickets, /closeticket, /rank, /leaderboard, /addword, /removeword, /listwords, /modtoggle, /manexinfo, /dbstatus, /buyvip, /vip_grant. Never invent other commands.
 Bot features: economy and daily rewards, ranks and leaderboard, tickets and payment support, moderation and word filter, VIP purchase, welcome messages, boost roles.
-VIP costs 500 Robux. Members buy with /buyvip, pay in a /payment ticket, and staff grant the VIP role with /vip_grant. VIP IDs look like VIP-1001. Do not invent other VIP perks.
+VIP costs 500 Robux. Members buy with /buyvip, pay in a /payment ticket, and staff grant the VIP role with /vip_grant. VIP IDs look like VIP-1001. Do not invent other VIP perks. Official VIP buy links, share them when someone asks how to buy VIP or pay: PayPal https://www.paypal.me/Ishmeetkalra and Roblox Gamepass https://www.roblox.com/game-pass/2053529602/VIP-discount. Tell users to pay with one of these, then send their payment proof on the VIP page or in a support ticket. Never give any other payment link.
 Payments: for payment problems send users to /payment. Never claim a payment was verified or a role was granted. Staff do not hold funds or guarantee deals. Warn users to verify identities, agree on deliverables first, and never share passwords, tokens, or recovery codes.
 Only help with scripts and files the user has the rights to use. Do not help break protections on someone else's paid or private content, and say so briefly when it applies.
 If you are not sure about something specific to this community, say so and point to @magmafox63911.`;
 
 /* ---------- Runtime state ---------- */
 // VIP payment links. Put your real links here.
-const VIP_LINKS = {paypal: "", gamepass: ""};
+const VIP_LINKS = {
+  paypal: "https://www.paypal.me/Ishmeetkalra",
+  gamepass: "https://www.roblox.com/game-pass/2053529602/VIP-discount",
+};
 const C = {acct:null,requests:[],discord:null,db:null,sample:null,assets:null,dl:null,user:null,me:null,posts:[],files:[],listings:[],jobs:[],names:{}};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -562,7 +565,7 @@ document.addEventListener("submit", async e => {
     if (f.id === "postF") { if (!gate("post in the community")) return; await postJSON("/api/posts", {text:v.t}); f.reset(); toast("Posted."); await loadCommunity(); }
     else if (f.id === "listF") { if (!gate("sell files")) return; await postJSON("/api/listings", {title:v.title, cat:v.cat, price:v.price, description:v.desc, seller:v.seller, fileUrl:v.fileUrl}); f.reset(); toast("Listing published."); await loadMarket(); }
     else if (f.id === "reqF") { if (!gate("request files")) return; await submitFileRequest(v, f); }
-    else if (f.id === "vipF") { if (!gate("buy VIP")) return; await postJSON("/api/vip", {method:v.method, proof:v.proof}); f.reset(); toast("Proof sent. Staff will check it and give you VIP."); await loadVipStatus(); }
+    else if (f.id === "vipF") { if (!gate("buy VIP")) return; await submitSupportTicket({s: "VIP purchase proof", m: "Payment method: " + v.method + ". Proof: " + v.proof}, f); await loadVipStatus(); }
     else if (f.id === "buyF") { await placeOrder(v); }
     else if (f.id === "jobF") { if (!gate("post a job")) return; await postJSON("/api/jobs", v); f.reset(); toast("Job posted."); await loadCommunity(); }
     else if (f.id === "fileF") {
@@ -714,7 +717,7 @@ async function submitSupportTicket(v, form){
     if (r.status === 403) throw new Error("Join the Discord server to open a support ticket.");
     throw new Error(j.error || ("Could not open the ticket (" + r.status + "). No ticket was created."));
   }
-  form.reset();
+  if (form) form.reset();
   showTicketToast(j.url);
 }
 function showTicketToast(url){
@@ -827,7 +830,7 @@ async function loadCommunity(){
 async function submitProof(){
   const proof = $("#pf").value.trim();
   if (!proof) return toast("Paste a link or transaction ID first.");
-  try { await postJSON("/api/proof", {code:C.code, proof}); toast("Proof sent. Staff will review it and deliver your file."); $("#pf").value = ""; }
+  try { await submitSupportTicket({s: "File order payment proof", m: "Order code: " + C.code + ". Proof: " + proof}, null); $("#pf").value = ""; }
   catch (err) { toast(err.message); }
 }
 
